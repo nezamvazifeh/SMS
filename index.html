@@ -106,7 +106,9 @@ const DEF=[
  {id:1,title:"ارجاع مدارک",code:"347635",swap:["GENDER","NAME"],
   text:"متقاضی گرامی {GENDER=آقای} {NAME=علی علی‌زاده} با کد ملی {NATIONALID=۰۰۰۰۰۰۰۰۰} مدارک شما با شناسه {ID=۷۵۷۵۷۶} به واحد تکمیلی جهت نهایی شدن ارجاع گردید.\nواحد مرکز"},
  {id:2,title:"ثبت دانشنامه",code:"655530",swap:["GENDER","NAME"],
-  text:"متقاضی گرامی {GENDER=آقای} {NAME=علی‌علیزاده} با کد ملی {NATIONALID=۰۰۰۰۰۰۰۰} دانشنامه {DEGREE=کارشناسی} شما در رشته {FIELD=مدیریت} با شناسه {ID=۰۰۰۰۰۰} ثبت گردید.\nواحد {UNIT=مرکز}"}
+  text:"متقاضی گرامی {GENDER=آقای} {NAME=علی‌علیزاده} با کد ملی {NATIONALID=۰۰۰۰۰۰۰۰} دانشنامه {DEGREE=کارشناسی} شما در رشته {FIELD=مدیریت} با شناسه {ID=۰۰۰۰۰۰} ثبت گردید.\nواحد {UNIT=مرکز}"},
+ {id:3,title:"ثبت درخواست",code:"860164",
+  text:"درخواست شما ثبت شد.\nکد رهگیری جهت فرآیند: {CODE}"}
 ];
 DEF.forEach(d=>{
   const e=T.find(t=>t.id===d.id);
@@ -122,7 +124,7 @@ function renderChips(){
   T.forEach((t,i)=>{const b=document.createElement("button");b.className="chip"+(i===sel?" on":"");b.textContent=t.title||("قالب "+(i+1));
     b.onclick=()=>{sel=i;ls.s("sms_sel",i);renderChips();renderText();};c.appendChild(b);});
 }
-const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد"};
+const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",CODE:"کد رهگیری"};
 const MARK="@";
 const norm=v=>v.trim().replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632);
 const box=$("sms");
