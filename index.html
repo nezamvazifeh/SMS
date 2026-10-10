@@ -110,7 +110,9 @@ const DEF=[
  {id:3,title:"ثبت درخواست",code:"860164",
   text:"درخواست شما ثبت شد.\nکد رهگیری جهت فرآیند: {CODE}"},
  {id:4,title:"تعلیق",code:"910708",
-  text:"درخواست شما به شماره رهگیری {CODE} در تاریخ جاری معلّق گردید.\nجهت پیگیری و بررسی دقیق‌تر، لطفاً با امور مربوطه تماس حاصل فرمایید.\nواحد مرکز"}
+  text:"درخواست شما به شماره رهگیری {CODE} در تاریخ جاری معلّق گردید.\nجهت پیگیری و بررسی دقیق‌تر، لطفاً با امور مربوطه تماس حاصل فرمایید.\nواحد مرکز"},
+ {id:5,title:"شهریه دانشجو",code:"187027",
+  text:"دانشجوی گرامی،\nبا توجه به بسته‌شدن پرتال آموزشی، خواهشمند است نسبت به تسویه بدهی شهریه خود در اسرع وقت اقدام فرمایید.\nواحد {UNI}"}
 ];
 DEF.forEach(d=>{
   const e=T.find(t=>t.id===d.id);
@@ -126,7 +128,7 @@ function renderChips(){
   T.forEach((t,i)=>{const b=document.createElement("button");b.className="chip"+(i===sel?" on":"");b.textContent=t.title||("قالب "+(i+1));
     b.onclick=()=>{sel=i;ls.s("sms_sel",i);renderChips();renderText();};c.appendChild(b);});
 }
-const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",CODE:"کد رهگیری"};
+const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",CODE:"کد رهگیری",UNI:"واحد"};
 const MARK="@";
 const norm=v=>v.trim().replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632);
 const box=$("sms");
