@@ -4,68 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ارسال پیامک</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
+:root{--ink:#123047;--teal:#0f766e;--mist:#e9eef2;--line:#cfd9e0;--amber:#ffe08a;--amber-d:#d49a00}
 *{box-sizing:border-box}
-body{margin:0;font-family:Tahoma,sans-serif;background:#f1f5f9;color:#0f172a;display:flex;justify-content:center;padding:16px}
-.card{position:relative;background:#fff;border-radius:14px;padding:20px;width:100%;max-width:480px;box-shadow:0 2px 12px #0001;margin-top:20px}
-h2{margin:0 0 14px;font-size:18px}
-label{display:block;font-size:13px;margin:12px 0 4px;color:#475569}
-input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;font-size:15px}
-button{width:100%;margin-top:16px;padding:12px;border:0;border-radius:8px;background:#2563eb;color:#fff;font:inherit;font-size:16px;cursor:pointer}
-button.sec{background:#e2e8f0;color:#0f172a;margin-top:8px}
+body{margin:0;font-family:Vazirmatn,Tahoma,sans-serif;background:var(--mist);color:var(--ink)}
+.app{max-width:480px;margin:0 auto;min-height:100vh}
+.top{background:var(--ink);color:#fff;padding:12px 22px;min-height:52px;display:flex;justify-content:space-between;align-items:center;border-radius:0 0 22px 22px;box-shadow:0 6px 18px #12304722}
+.top h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.2px;opacity:.92}
+.wrench{background:none;border:0;color:#fff;opacity:.7;font-size:15px;padding:6px 8px;cursor:pointer}
+main{padding:26px 20px 120px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+button{font:inherit;cursor:pointer}
 button:disabled{opacity:.6}
-.wrench{position:absolute;top:10px;left:10px;width:auto;margin:0;padding:4px 6px;background:none;color:#94a3b8;font-size:14px;opacity:.5}
-.keybox{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:2px 12px 12px;margin-bottom:12px}
-.chips{display:flex;flex-wrap:wrap;gap:10px 8px;margin-top:8px}
-.chip{position:relative;width:auto;margin:0;padding:8px 14px;font-size:14px;background:#e2e8f0;color:#0f172a;border-radius:20px}
-.chip.on{background:#2563eb;color:#fff}
-.badge{position:absolute;top:-8px;right:-4px;background:#f59e0b;color:#fff;font-size:9px;line-height:1;padding:3px 6px;border-radius:8px;box-shadow:0 1px 3px #0003}
-.sms{background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:14px;font-size:15px;line-height:2.1;margin-top:6px}
-.f{background:#fef9c3;border-bottom:2px solid #eab308;border-radius:4px;padding:2px 6px;outline:none;display:inline-block;min-width:40px}
-.f:empty::before{content:attr(data-ph);color:#a16207;opacity:.7}
+.keybox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+.keybox button{width:100%;margin-top:10px;padding:10px;border:0;border-radius:10px;background:var(--ink);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:16px 10px;padding-top:6px}
+.chip{position:relative;padding:8px 12px;font-size:13px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px}
+.chip.fav{background:#fff;border-color:var(--amber-d);font-weight:600}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.badge{position:absolute;top:-9px;right:6px;background:var(--amber-d);color:#fff;font-size:9px;line-height:1;padding:3px 6px;border-radius:6px;font-weight:400}
+.phone{background:#d5dee5;border-radius:22px;padding:20px;margin-top:30px}
+.bubble{background:#fff;border-radius:18px 18px 18px 4px;padding:18px 20px;font-size:15px;line-height:2.15}
+.f{background:var(--amber);border-bottom:2px solid var(--amber-d);border-radius:6px;padding:1px 8px;outline:none;display:inline-block;min-width:44px}
+.f:empty::before{content:attr(data-ph);opacity:.6}
 .f.bad{background:#fecaca;border-bottom-color:#dc2626}
-.f:focus{background:#fde68a}
-.hint{font-size:12px;color:#64748b;margin-top:6px;line-height:1.7}
-.msg{margin-top:12px;padding:10px;border-radius:8px;font-size:14px;display:none}
-.ok{background:#dcfce7;color:#166534}.err{background:#fee2e2;color:#991b1b}
+.f:focus{background:#ffd24d}
+.hint{font-size:12px;color:#5b7183;margin-top:14px}
+.msg{margin-top:14px;padding:10px 12px;border-radius:10px;font-size:14px;display:none}
+.ok{background:#d9f2ec;color:#0b5b53}.err{background:#fde2e2;color:#9b1c1c}
 .hide{display:none}
-.toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-120px);background:#166534;color:#fff;padding:12px 22px;border-radius:12px;box-shadow:0 6px 20px #0003;font-size:15px;transition:transform .35s;z-index:99}
+.tools{display:flex;gap:2px}
+#hist{margin-top:26px}
+.hh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-weight:600;font-size:14px}
+.hh button{width:auto;margin:0;padding:6px 12px;border:0;border-radius:8px;background:#d5dee5;color:var(--ink);font-size:13px}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
+.bar input{flex:1;max-width:310px;direction:ltr;text-align:right}
+#send{padding:0 24px;border:0;border-radius:10px;background:var(--teal);color:#fff;font-weight:600;font-size:16px}
+.toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-120px);background:var(--teal);color:#fff;padding:12px 22px;border-radius:12px;font-size:15px;transition:transform .35s;z-index:99}
 .toast.show{transform:translate(-50%,0)}
-.hi{border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.8}
+.hi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px;line-height:1.9}
 .hi b{font-size:14px}
-.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px}
-.tag.ok{background:#dcfce7;color:#166534}.tag.err{background:#fee2e2;color:#991b1b}
-.tag.op{background:#dbeafe;color:#1e40af}.tag.wait{background:#fef9c3;color:#854d0e}
+.tag{display:inline-block;padding:1px 8px;border-radius:8px;font-size:12px}
+.tag.ok{background:#d9f2ec;color:#0b5b53}.tag.err{background:#fde2e2;color:#9b1c1c}
+.tag.op{background:#dbeafe;color:#1e40af}.tag.wait{background:#fff1c2;color:#7a5600}
 .raw{color:#94a3b8;font-size:11px}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
-
-<div class="card">
-  <button class="wrench" id="wrench" title="تنظیمات">🔧</button>
-  <h2>📨 ارسال پیامک</h2>
-
-  <div class="keybox hide" id="keyBox">
-    <label>API Key</label>
-    <input id="key" type="password" dir="ltr">
-    <button id="saveKey">💾 ذخیره</button>
-  </div>
-
-  <label>قالب</label>
-  <div class="chips" id="chips"></div>
-
-  <label>شماره موبایل گیرنده</label>
-  <input id="mobile" inputmode="numeric" placeholder="09123456789">
-
-  <label>متن پیامک</label>
-  <div class="sms" id="sms"></div>
-  <div class="hint">روی بخش‌های زرد کلیک کن و ویرایش کن</div>
-
-  <button id="send">🚀 ارسال</button>
-  <div class="msg" id="out"></div>
-  <button class="sec" id="histBtn">🕘 تاریخچه</button>
-  <div class="hide" id="hist"></div>
+<div class="app">
+  <header class="top"><h1>ارسال پیامک</h1><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
+  <main>
+    <div class="keybox hide" id="keyBox">
+      <input id="key" type="password" dir="ltr" placeholder="API Key">
+      <button id="saveKey">ذخیره</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <section class="phone">
+      <div class="bubble" id="sms"></div>
+      <div class="hint">روی بخش‌های زرد بزن و مقدار را بنویس</div>
+    </section>
+    <div class="msg" id="out"></div>
+    <div class="hide" id="hist"></div>
+  </main>
+  <footer class="bar">
+    <input id="mobile" inputmode="numeric" placeholder="09123456789">
+    <button id="send">ارسال</button>
+  </footer>
 </div>
 
 <script>
@@ -119,7 +125,7 @@ let sel=Math.max(0,T.findIndex(t=>t.code===ls.g("sms_selc","")));
 function renderChips(){
   const c=$("chips");c.innerHTML="";
   T.forEach((t,i)=>{
-    const b=document.createElement("button");b.className="chip"+(i===sel?" on":"");b.textContent=t.title;
+    const b=document.createElement("button");b.className="chip"+(i===sel?" on":"");b.textContent=t.title;if(t.fav)b.classList.add("fav");
     if(t.fav){const g=document.createElement("span");g.className="badge";g.textContent="⭐ ویژه";b.appendChild(g);}
     b.onclick=()=>{sel=i;ls.s("sms_selc",t.code);renderChips();renderText();};
     c.appendChild(b);
@@ -185,7 +191,11 @@ function info(s){
 }
 function renderH(){
   const b=$("hist"),h=loadH();b.innerHTML="";
-  if(!h.length){b.textContent="هنوز پیامکی ارسال نشده";return;}
+  const hh=document.createElement("div");hh.className="hh";
+  const ti=document.createElement("span");ti.textContent="تاریخچه ارسال‌ها";hh.appendChild(ti);
+  const rb=document.createElement("button");rb.textContent="🔄 بروزرسانی";rb.onclick=refreshH;hh.appendChild(rb);
+  b.appendChild(hh);
+  if(!h.length){const e=document.createElement("div");e.className="hint";e.textContent="هنوز پیامکی ارسال نشده";b.appendChild(e);return;}
   h.forEach(x=>{
     const [txt,cls]=info(x.s),d=document.createElement("div");d.className="hi";
     const bb=document.createElement("b");bb.textContent=(x.name||"-")+" — "+x.mobile;d.appendChild(bb);
@@ -196,7 +206,6 @@ function renderH(){
     d.appendChild(document.createTextNode((x.tpl?x.tpl+" • ":"")+new Date(x.t).toLocaleString("fa-IR")));
     b.appendChild(d);
   });
-  const rb=document.createElement("button");rb.className="sec";rb.textContent="🔄 بروزرسانی وضعیت";rb.onclick=refreshH;b.appendChild(rb);
 }
 async function refreshH(){
   const key=$("key").value.trim();if(!key)return toast("اول API Key را از 🔧 وارد کن");
@@ -211,7 +220,10 @@ async function refreshH(){
   }
   saveH(h);renderH();
 }
-$("histBtn").onclick=()=>{const b=$("hist");b.classList.toggle("hide");if(!b.classList.contains("hide")){renderH();refreshH();}};
+$("histBtn").onclick=()=>{
+  const b=$("hist");b.classList.toggle("hide");
+  if(!b.classList.contains("hide")){renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
+};
 </script>
 </body>
 </html>
