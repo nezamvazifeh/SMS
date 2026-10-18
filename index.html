@@ -27,8 +27,9 @@ button:disabled{opacity:.6}
 .badge{position:absolute;top:-7px;right:5px;background:var(--amber-d);color:#fff;font-size:8px;line-height:1;padding:2px 5px;border-radius:5px;font-weight:400}
 .phone{background:#d5dee5;border-radius:18px;padding:12px;margin-top:18px}
 .bubble{background:#fff;border-radius:16px 16px 16px 4px;padding:12px 14px;font-size:14px;line-height:1.85}
-.f{background:var(--amber);border-bottom:1.5px solid var(--amber-d);border-radius:4px;padding:0 4px;margin:0;font-size:12.5px;line-height:1.3;outline:none;display:inline-block;vertical-align:baseline;min-width:26px}
-.f:empty::before{content:attr(data-ph);opacity:.6}
+.f{background:var(--amber);border:0;border-bottom:1.5px solid var(--amber-d);border-radius:4px;padding:0 4px;margin:0;height:auto;font:inherit;font-size:12.5px;line-height:1.3;color:var(--ink);text-align:center;outline:none;display:inline-block;vertical-align:baseline;min-width:26px;box-shadow:none}
+.f.meas{position:absolute;visibility:hidden;white-space:pre;left:-9999px;top:0;width:auto}
+.f::placeholder{color:#8a6a00;opacity:.75}
 .f.bad{background:#fecaca;border-bottom-color:#dc2626}
 .f:focus{background:#ffd24d}
 .hint{font-size:11.5px;color:#5b7183;margin-top:8px}
@@ -137,23 +138,28 @@ function renderChips(){
   });
 }
 const box=$("sms");
+const meas=document.createElement("span");meas.className="f meas";document.body.appendChild(meas);
+function fit(el){meas.textContent=el.value||el.placeholder;el.style.width=(meas.offsetWidth+10)+"px";}
+const NUMERIC=["NATIONALID","ID","CODE","TIME"];
 function renderText(){
   box.innerHTML="";
   T[sel].text.split(/(\{[A-Za-z0-9_]+\})/).forEach(p=>{
     const m=p.match(/^\{([A-Za-z0-9_]+)\}$/);
     if(m){
-      const s=document.createElement("span");s.className="f";s.contentEditable="true";
-      s.dataset.n=m[1];s.dataset.ph=LABELS[m[1]]||m[1];s.textContent=MARK;
-      s.oninput=()=>s.classList.remove("bad");
-      s.onfocus=()=>{const r=document.createRange();r.selectNodeContents(s);const g=getSelection();g.removeAllRanges();g.addRange(r);if(!document.body.classList.contains("editing")){prevY=window.scrollY;kbOpen=false;}document.body.classList.add("editing");[60,300,650].forEach(d=>setTimeout(up,d));};
+      const s=document.createElement("input");s.type="text";s.className="f";
+      s.dataset.n=m[1];s.placeholder=LABELS[m[1]]||m[1];
+      s.autocomplete="off";s.autocapitalize="none";s.spellcheck=false;
+      if(NUMERIC.includes(m[1]))s.inputMode="numeric";
+      s.oninput=()=>{s.classList.remove("bad");fit(s);};
+      s.onfocus=()=>{if(!document.body.classList.contains("editing")){prevY=window.scrollY;kbOpen=false;}document.body.classList.add("editing");[60,300,650].forEach(d=>setTimeout(up,d));};
       s.onblur=()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&a.classList&&a.classList.contains("f")))restore();},60);
-      s.onkeydown=e=>{if(e.key==="Enter")e.preventDefault();};
-      s.onpaste=e=>{e.preventDefault();document.execCommand("insertText",false,(e.clipboardData.getData("text")||"").replace(/\n/g," "));};
-      box.appendChild(s);
+      s.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const all=[...box.querySelectorAll(".f")],k=all.indexOf(s);if(all[k+1])all[k+1].focus();else s.blur();}};
+      box.appendChild(s);fit(s);
     }else p.split("\n").forEach((l,i)=>{if(i)box.appendChild(document.createElement("br"));box.appendChild(document.createTextNode(l));});
   });
 }
 renderChips();renderText();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>box.querySelectorAll(".f").forEach(fit));
 
 // وقتی روی کادر زرد می‌زنی، متن پیامک بالای صفحه می‌آید تا زیر کیبورد نرود
 function up(){const el=document.querySelector(".phone");if(!el||!document.body.classList.contains("editing"))return;window.scrollTo(0,Math.max(0,el.getBoundingClientRect().top+window.scrollY-10));}
@@ -182,9 +188,9 @@ $("send").onclick=async()=>{
   if(!key){$("keyBox").classList.remove("hide");return msg("API Key را از علامت 🔧 بالای صفحه وارد کن","err");}
   if(!/^09\d{9}$/.test(mobile))return msg("شماره موبایل معتبر نیست","err");
   const spans=[...box.querySelectorAll(".f")];
-  const empty=spans.filter(x=>{const v=x.textContent.trim();return !v||v===MARK;});
+  const empty=spans.filter(x=>!x.value.trim());
   if(empty.length){empty.forEach(x=>x.classList.add("bad"));return msg("بخش‌های قرمز را پر کن","err");}
-  const parameters=spans.map(s=>({name:s.dataset.n,value:s.textContent.trim()}));
+  const parameters=spans.map(s=>({name:s.dataset.n,value:s.value.trim()}));
   const np=parameters.find(p=>p.name==="NAME")||parameters[0]||{value:""};
   // در قالب‌های sms.ir جنسیت بعد از نام می‌آید؛ برای نمایش «آقای نام» مقدارها جابه‌جا فرستاده می‌شوند
   if(parameters.some(p=>p.name==="GENDER")&&parameters.some(p=>p.name==="NAME"))
