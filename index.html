@@ -140,7 +140,6 @@ function renderChips(){
 const box=$("sms");
 const meas=document.createElement("span");meas.className="f meas";document.body.appendChild(meas);
 function fit(el){meas.textContent=el.value||el.placeholder;el.style.width=(meas.offsetWidth+10)+"px";}
-const NUMERIC=["NATIONALID","ID","CODE","TIME"];
 function renderText(){
   box.innerHTML="";
   T[sel].text.split(/(\{[A-Za-z0-9_]+\})/).forEach(p=>{
@@ -149,7 +148,6 @@ function renderText(){
       const s=document.createElement("input");s.type="text";s.className="f";
       s.dataset.n=m[1];s.placeholder=LABELS[m[1]]||m[1];
       s.autocomplete="off";s.autocapitalize="none";s.spellcheck=false;
-      if(NUMERIC.includes(m[1]))s.inputMode="numeric";
       s.oninput=()=>{s.classList.remove("bad");fit(s);};
       s.onfocus=()=>{if(!document.body.classList.contains("editing")){prevY=window.scrollY;kbOpen=false;}document.body.classList.add("editing");[60,300,650].forEach(d=>setTimeout(up,d));};
       s.onblur=()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&a.classList&&a.classList.contains("f")))restore();},60);
