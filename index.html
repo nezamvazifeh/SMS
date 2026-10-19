@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<meta name="theme-color" content="#123047">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>ارسال پیامک</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +23,7 @@ button{font:inherit;cursor:pointer}
 button:disabled{opacity:.6}
 .keybox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
 .keybox button{width:100%;margin-top:10px;padding:10px;border:0;border-radius:10px;background:var(--ink);color:#fff}
-.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:13px 6px;padding-top:8px}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 6px;padding-top:2px}
 .chip{position:relative;width:100%;height:34px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 3px;font-size:10.5px;line-height:1.2;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:9px}
 .chip.long{font-size:9px}
 .chip.fav{background:#fff;border-color:var(--amber-d);font-weight:600}
@@ -54,6 +58,10 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
 .tag.ok{background:#d9f2ec;color:#0b5b53}.tag.err{background:#fde2e2;color:#9b1c1c}
 .tag.op{background:#dbeafe;color:#1e40af}.tag.wait{background:#fff1c2;color:#7a5600}
 .raw{color:#94a3b8;font-size:11px}
+.morebtn{display:block;width:100%;margin-top:8px;padding:6px;border:0;border-top:1px dashed var(--line);background:none;color:#5b7183;font-size:12px}
+.more-box{overflow:hidden;max-height:0;padding-top:0;transition:max-height .3s ease,padding .3s ease}
+.more-box.open{max-height:320px;padding-top:10px}
+.re{width:auto;margin-top:6px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:12px}
 </style>
 </head>
 <body>
@@ -66,6 +74,8 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
       <button id="saveKey">ذخیره</button>
     </div>
     <div class="chips" id="chips"></div>
+    <button class="morebtn" id="moreBtn"></button>
+    <div class="chips more-box" id="chipsMore"></div>
     <section class="phone">
       <div class="bubble" id="sms"></div>
       <div class="hint">روی بخش‌های زرد بزن و مقدار را بنویس</div>
@@ -85,11 +95,12 @@ const REPORT_URL="https://api.sms.ir/v1/send/";
 const $=id=>document.getElementById(id);
 const ls={g(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const MARK="@";
+function validNID(v){v=norm(v);if(!/^\d{10}$/.test(v)||/^(\d)\1{9}$/.test(v))return false;let n=0;for(let i=0;i<9;i++)n+=+v[i]*(10-i);const r=n%11,c=+v[9];return r<2?c===r:c===11-r;}
 const norm=v=>v.trim().replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632);
 
 // ===== قالب‌ها: [کد، عنوان، متن، ویژه] — هر {NAME} یک کادر قابل ویرایش است =====
 const P="متقاضی گرامی {GENDER} {NAME} با کد ملی {NATIONALID} ";
-const T=[
+const ALL=[
  // ویژه‌ها (به ترتیب)
  ["955721","گواهینامه ارجاع",P+"گواهینامه به شماره {CODE} با شناسه {ID} به واحد بررسی ارجاع داده شد.\nواحد {UNIT}",1],
  ["747266","ارجاع دانشنامه",P+"دانشنامه {DEGREE} شما در رشته {FIELD} با شناسه {ID} به واحد تکمیلی جهت پرداخت شهریه ارجاع گردید.\nواحد {UNIT}",1],
@@ -106,8 +117,18 @@ const T=[
  ["347635","ارجاع مدارک",P+"مدارک شما با شناسه {ID} به واحد تکمیلی جهت نهایی شدن ارجاع گردید.\nواحد مرکز"],
  ["655530","ثبت دانشنامه",P+"دانشنامه {DEGREE} شما در رشته {FIELD} با شناسه {ID} ثبت گردید.\nواحد {UNIT}"],
  ["860164","ثبت درخواست","درخواست شما ثبت شد.\nکد رهگیری جهت فرآیند: {CODE}"],
- ["910708","تعلیق","درخواست شما به شماره رهگیری {CODE} در تاریخ جاری معلّق گردید.\nجهت پیگیری و بررسی دقیق‌تر، لطفاً با امور مربوطه تماس حاصل فرمایید.\nواحد مرکز"]
-].map(a=>({code:a[0],title:a[1],text:a[2],fav:!!a[3]}));
+ ["910708","تعلیق","درخواست شما به شماره رهگیری {CODE} در تاریخ جاری معلّق گردید.\nجهت پیگیری و بررسی دقیق‌تر، لطفاً با امور مربوطه تماس حاصل فرمایید.\nواحد مرکز"],
+ ["529543","مهارت",P+"مهارت شما در رشته {FIELD} با شناسه {ID} ثبت گردید.\nواحد {UNIT}"],
+ ["570510","فاقد اعتبار","دانشنامه تحصیلی شما بایگانی و در تاریخ فوق فاقد اعتبار می‌باشد.\nواحد {UNIT}"],
+ ["146224","پذیرش دانشجو",P+"پذیرش شما در مقطع {DEGREE} و رشته {FIELD} با شناسه {ID} تایید شد.\nواحد {UNIT}"],
+ ["396824","وزارت علوم","درخواست وزارت علوم ثبت و ارجاع گردید.\nشناسه تایید: {CODE|شناسه تایید}\nوزارت علوم تحقیقات و فناوری"],
+ ["502350","اعلام رتبه",P+"دریافت رتبه {CODE|رتبه} در رشته {FIELD} با شناسه {ID} تایید و واحد تکمیلی جهت نهایی شدن ارجاع گردید.\nواحد {UNIT}"],
+ ["306627","معافیت تحصیلی",P+"معافیت تحصیلی با شناسه {ID} تایید شد.\nواحد {UNIT}"],
+ ["473153","کد صحت","متقاضی گرامی جهت استعلام کد صحت را وارد کنید.\nکد صحت: {CODE|کد صحت}\nواحد {UNIT}"]
+].map(a=>({code:a[0],title:a[1],text:a[2]}));
+const FAV=["955721","318623","747266","187027","127086","396824","353394","860164","910708"];
+const T=FAV.map(c=>ALL.find(x=>x.code===c)).concat(ALL.filter(x=>!FAV.includes(x.code)));
+T.forEach((x,i)=>x.fav=i<FAV.length);
 
 const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",UNI:"واحد",CODE:"کد",TIME:"مدت (روز)"};
 
@@ -127,31 +148,34 @@ $("saveKey").onclick=()=>{if(!$("key").value.trim())return toast("API Key را �
 
 // ===== انتخاب قالب =====
 let sel=Math.max(0,T.findIndex(t=>t.code===ls.g("sms_selc","")));
+function moreLabel(){const m=$("chipsMore");$("moreBtn").textContent=m.classList.contains("open")?"کمتر ▴":"بیشتر ("+T.filter(t=>!t.fav).length+") ▾";}
 function renderChips(){
-  const c=$("chips");c.innerHTML="";
+  const a=$("chips"),m=$("chipsMore");a.innerHTML="";m.innerHTML="";
   T.forEach((t,i)=>{
     const b=document.createElement("button");b.className="chip"+(i===sel?" on":"");b.textContent=t.title;if(t.fav)b.classList.add("fav");if(t.title.length>12)b.classList.add("long");
-    if(t.fav){const g=document.createElement("span");g.className="badge";g.textContent="⭐ ویژه";b.appendChild(g);}
     b.onclick=()=>{sel=i;ls.s("sms_selc",t.code);renderChips();renderText();};
-    c.appendChild(b);
-    if(t.fav&&!(T[i+1]&&T[i+1].fav))for(let k=(4-(i+1)%4)%4;k>0;k--)c.appendChild(document.createElement("div"));
+    (t.fav?a:m).appendChild(b);
   });
+  if(!T[sel].fav)m.classList.add("open");
+  moreLabel();
 }
+$("moreBtn").onclick=()=>{$("chipsMore").classList.toggle("open");moreLabel();};
 const box=$("sms");
 const meas=document.createElement("span");meas.className="f meas";document.body.appendChild(meas);
 function fit(el){meas.textContent=el.value||el.placeholder;el.style.width=(meas.offsetWidth+10)+"px";}
 function renderText(){
   box.innerHTML="";
-  T[sel].text.split(/(\{[A-Za-z0-9_]+\})/).forEach(p=>{
-    const m=p.match(/^\{([A-Za-z0-9_]+)\}$/);
+  T[sel].text.split(/(\{[A-Za-z0-9_]+(?:\|[^}]*)?\})/).forEach(p=>{
+    const m=p.match(/^\{([A-Za-z0-9_]+)(?:\|([^}]*))?\}$/);
     if(m){
       const s=document.createElement("input");s.type="text";s.className="f";
-      s.dataset.n=m[1];s.placeholder=LABELS[m[1]]||m[1];
+      s.dataset.n=m[1];s.placeholder=m[2]||LABELS[m[1]]||m[1];
       s.autocomplete="off";s.autocapitalize="none";s.spellcheck=false;
       s.oninput=()=>{s.classList.remove("bad");fit(s);};
       s.onfocus=()=>{if(!document.body.classList.contains("editing")){prevY=window.scrollY;kbOpen=false;}document.body.classList.add("editing");[60,300,650].forEach(d=>setTimeout(up,d));};
       s.onblur=()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&a.classList&&a.classList.contains("f")))restore();},60);
       s.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const all=[...box.querySelectorAll(".f")],k=all.indexOf(s);if(all[k+1])all[k+1].focus();else s.blur();}};
+      if(m[1]==="NATIONALID")s.addEventListener("blur",()=>{if(s.value.trim()&&!validNID(s.value))s.classList.add("bad");});
       box.appendChild(s);fit(s);
     }else p.split("\n").forEach((l,i)=>{if(i)box.appendChild(document.createElement("br"));box.appendChild(document.createTextNode(l));});
   });
@@ -190,6 +214,11 @@ $("send").onclick=async()=>{
   if(empty.length){empty.forEach(x=>x.classList.add("bad"));return msg("بخش‌های قرمز را پر کن","err");}
   const parameters=spans.map(s=>({name:s.dataset.n,value:s.value.trim()}));
   const np=parameters.find(p=>p.name==="NAME")||parameters[0]||{value:""};
+  const saved=parameters.map(p=>({n:p.name,v:p.value}));
+  const nidF=spans.find(x=>x.dataset.n==="NATIONALID");
+  if(nidF&&!validNID(nidF.value)){nidF.classList.add("bad");if(!confirm("کد ملی معتبر به نظر نمی‌رسد. به‌هر حال ارسال شود؟"))return;}
+  const dup=loadH().find(x=>x.code===t.code&&x.mobile===mobile&&Date.now()-x.t<60000);
+  if(dup&&!confirm("همین قالب تا یک دقیقه پیش به همین شماره ارسال شده. دوباره ارسال شود؟"))return;
   // در قالب‌های sms.ir جنسیت بعد از نام می‌آید؛ برای نمایش «آقای نام» مقدارها جابه‌جا فرستاده می‌شوند
   if(parameters.some(p=>p.name==="GENDER")&&parameters.some(p=>p.name==="NAME"))
     parameters.forEach(p=>{if(p.name==="GENDER")p.name="NAME";else if(p.name==="NAME")p.name="GENDER";});
@@ -201,7 +230,7 @@ $("send").onclick=async()=>{
     const d=await r.json().catch(()=>({}));
     if(r.ok&&d.status===1){
       $("out").style.display="none";toast("✅ پیامک ارسال شد");
-      const h=loadH();h.unshift({id:d.data&&d.data.messageId,mobile,name:np.value,tpl:t.title,t:Date.now(),s:null});
+      const h=loadH();h.unshift({id:d.data&&d.data.messageId,mobile,name:np.value,tpl:t.title,code:t.code,vals:saved,t:Date.now(),s:null});
       saveH(h);if(!$("hist").classList.contains("hide"))renderH();
       $("mobile").value="";renderText();
     }else msg("❌ خطا: "+(d.message||r.status),"err");
@@ -224,7 +253,10 @@ function renderH(){
   const b=$("hist"),h=loadH();b.innerHTML="";
   const hh=document.createElement("div");hh.className="hh";
   const ti=document.createElement("span");ti.textContent="تاریخچه ارسال‌ها";hh.appendChild(ti);
-  const rb=document.createElement("button");rb.textContent="🔄 بروزرسانی";rb.onclick=refreshH;hh.appendChild(rb);
+  const rb=document.createElement("button");rb.textContent="🔄 بروزرسانی";rb.onclick=refreshH;
+  const cb=document.createElement("button");cb.textContent="🗑 پاک کردن";
+  cb.onclick=()=>{if(confirm("تاریخچه ارسال‌ها پاک شود؟")){saveH([]);renderH();toast("تاریخچه پاک شد");}};
+  const grp=document.createElement("div");grp.style.cssText="display:flex;gap:6px";grp.appendChild(rb);grp.appendChild(cb);hh.appendChild(grp);
   b.appendChild(hh);
   if(!h.length){const e=document.createElement("div");e.className="hint";e.textContent="هنوز پیامکی ارسال نشده";b.appendChild(e);return;}
   h.forEach(x=>{
@@ -235,8 +267,16 @@ function renderH(){
     const r=document.createElement("span");r.className="raw";r.textContent=" کد وضعیت: "+(x.s==null?"-":x.s);d.appendChild(r);
     d.appendChild(document.createElement("br"));
     d.appendChild(document.createTextNode((x.tpl?x.tpl+" • ":"")+new Date(x.t).toLocaleString("fa-IR")));
+    if(x.vals&&x.code){d.appendChild(document.createElement("br"));const re=document.createElement("button");re.className="re";re.textContent="🔁 ارسال دوباره";re.onclick=()=>resend(x);d.appendChild(re);}
     b.appendChild(d);
   });
+}
+function resend(x){
+  const i=T.findIndex(t=>t.code===x.code);if(i<0)return toast("قالب پیدا نشد");
+  sel=i;ls.s("sms_selc",x.code);renderChips();renderText();
+  box.querySelectorAll(".f").forEach(f=>{const v=(x.vals||[]).find(p=>p.n===f.dataset.n);if(v){f.value=v.v;fit(f);}});
+  $("hist").classList.add("hide");$("mobile").value="";window.scrollTo({top:0});
+  toast("🔁 آماده ارسال؛ شماره را بنویس");$("mobile").focus();
 }
 async function refreshH(){
   const key=$("key").value.trim();if(!key)return toast("اول API Key را از 🔧 وارد کن");
@@ -255,6 +295,7 @@ $("histBtn").onclick=()=>{
   const b=$("hist");b.classList.toggle("hide");
   if(!b.classList.contains("hide")){renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
 };
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
