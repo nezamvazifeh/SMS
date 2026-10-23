@@ -70,7 +70,7 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
   <header class="top"><h1>ارسال پیامک</h1><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
   <main>
     <div class="keybox hide" id="keyBox">
-      <input id="key" type="password" dir="ltr" placeholder="رمز دسترسی">
+      <input id="key" type="password" dir="ltr" placeholder="API Key">
       <button id="saveKey">ذخیره</button>
     </div>
     <div class="chips" id="chips"></div>
@@ -90,10 +90,8 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
 </div>
 
 <script>
-// ===== آدرس Worker کلودفلر خودت را اینجا بگذار =====
-const WORKER="https://hidden-cherry-875a.asnadir361.workers.dev";
-const API_URL=WORKER+"/send";
-const REPORT_URL=WORKER+"/report/";
+const API_URL="https://api.sms.ir/v1/send/verify";
+const REPORT_URL="https://api.sms.ir/v1/send/";
 const $=id=>document.getElementById(id);
 const ls={g(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const MARK="@";
@@ -139,15 +137,14 @@ let tt;
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),3500);}
 function msg(t,c){const o=$("out");o.textContent=t;o.className="msg "+c;o.style.display="block";}
 
-// ===== رمز دسترسی (پشت علامت آچار) =====
-try{localStorage.removeItem("sms_key")}catch(e){}
-$("key").value=ls.g("sms_token","");
-const sk=()=>ls.s("sms_token",$("key").value.trim());
+// ===== API Key (پشت علامت آچار) =====
+$("key").value=ls.g("sms_key","");
+const sk=()=>ls.s("sms_key",$("key").value.trim());
 ["input","change","blur"].forEach(ev=>$("key").addEventListener(ev,sk));
 window.addEventListener("pagehide",sk);
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
 $("wrench").onclick=()=>$("keyBox").classList.toggle("hide");
-$("saveKey").onclick=()=>{if(!$("key").value.trim())return toast("رمز دسترسی را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");};
+$("saveKey").onclick=()=>{if(!$("key").value.trim())return toast("API Key را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");};
 
 // ===== انتخاب قالب =====
 let sel=Math.max(0,T.findIndex(t=>t.code===ls.g("sms_selc","")));
@@ -210,8 +207,7 @@ $("mobile").addEventListener("blur",()=>setTimeout(liftBar,100));
 // ===== ارسال =====
 $("send").onclick=async()=>{
   const key=$("key").value.trim(),t=T[sel],mobile=norm($("mobile").value);
-  if(WORKER.includes("YOUR-WORKER"))return msg("آدرس Worker هنوز داخل فایل تنظیم نشده","err");
-  if(!key){$("keyBox").classList.remove("hide");return msg("رمز دسترسی را از علامت 🔧 بالای صفحه وارد کن","err");}
+  if(!key){$("keyBox").classList.remove("hide");return msg("API Key را از علامت 🔧 بالای صفحه وارد کن","err");}
   if(!/^09\d{9}$/.test(mobile))return msg("شماره موبایل معتبر نیست","err");
   const spans=[...box.querySelectorAll(".f")];
   const empty=spans.filter(x=>!x.value.trim());
@@ -229,7 +225,7 @@ $("send").onclick=async()=>{
   $("send").disabled=true;msg("در حال ارسال...","ok");
   try{
     const r=await fetch(API_URL,{method:"POST",
-      headers:{"Content-Type":"application/json","Accept":"application/json","x-app-token":key},
+      headers:{"Content-Type":"application/json","Accept":"application/json","x-api-key":key},
       body:JSON.stringify({mobile,templateId:Number(t.code),parameters})});
     const d=await r.json().catch(()=>({}));
     if(r.ok&&d.status===1){
@@ -283,12 +279,12 @@ function resend(x){
   toast("🔁 آماده ارسال؛ شماره را بنویس");$("mobile").focus();
 }
 async function refreshH(){
-  const key=$("key").value.trim();if(!key)return toast("اول رمز دسترسی را از 🔧 وارد کن");
+  const key=$("key").value.trim();if(!key)return toast("اول API Key را از 🔧 وارد کن");
   const h=loadH();
   for(const x of h){
     if(!x.id||x.s===1||x.s===2)continue;
     try{
-      const r=await fetch(REPORT_URL+x.id,{headers:{"Accept":"application/json","x-app-token":key}});
+      const r=await fetch(REPORT_URL+x.id,{headers:{"Accept":"application/json","x-api-key":key}});
       const d=await r.json();
       if(d&&d.data)x.s=(d.data.deliveryState===undefined?null:d.data.deliveryState);
     }catch(e){}
@@ -299,7 +295,7 @@ $("histBtn").onclick=()=>{
   const b=$("hist");b.classList.toggle("hide");
   if(!b.classList.contains("hide")){renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
 };
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>r{}));
 </script>
 </body>
 </html>
