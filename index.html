@@ -319,7 +319,11 @@ function showQuota(d){
 }
 async function loadMe(){
   const key=$("key").value.trim();if(!key||WORKER.includes("YOUR-WORKER"))return;
-  try{const r=await fetch(WORKER+"/me",{headers:{"x-app-token":key}});showQuota(r.ok?await r.json():null);}catch(e){}
+  try{
+    const r=await fetch(WORKER+"/me",{headers:{"x-app-token":key}}),d=await r.json().catch(()=>null);
+    if(r.status===403&&d&&d.message){const q=$("quota");q.textContent="⛔ مسدود";q.className="quota zero";msg(d.message,"err");return;}
+    showQuota(r.ok?d:null);
+  }catch(e){}
 }
 
 // نوار شماره موبایل مثل سربرگ کیبورد، دقیقاً بالای آن می‌نشیند
