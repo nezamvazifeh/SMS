@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>مدیریت پیامک</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Vazirmatn,Tahoma,sans-serif;color:#e9eefb;background:radial-gradient(60% 40% at 92% -5%,#3a4fe05a,transparent 70%),radial-gradient(50% 35% at 0% 36%,#12b8a238,transparent 70%),#080d1c;background-attachment:fixed;min-height:100vh}
+.app{max-width:520px;margin:0 auto;padding:0 16px 40px}
+header{padding:18px 4px;font-weight:800;font-size:17px}
+.card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:14px;margin-bottom:14px}
+h3{margin:0 0 10px;font-size:14px;color:#b8c4e0}
+input{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#e9eefb;font:inherit;margin-bottom:8px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 12px;background:rgba(255,255,255,.12);color:#e9eefb;transition:transform .15s}
+button:active{transform:scale(.94)}
+.pri{background:linear-gradient(135deg,#3a5bff,#12b5c9);color:#fff;font-weight:600;width:100%;padding:12px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.u{display:flex;flex-direction:column;gap:8px}
+.u b{font-size:15px}.u small{color:#8e9bb8}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#3dd9c0,#6d8bff);transition:width .5s}
+.bar i.low{background:#ffd98a}.bar i.zero{background:#ff6b6b}
+.btns{display:flex;flex-wrap:wrap;gap:6px}.btns button{font-size:12.5px;padding:7px 10px}
+.off{opacity:.55}
+.red{background:#ff6b6b30;color:#ff9f9f}
+.log{font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px}
+.log:last-child{border:0}.okc{color:#7ff0dc}.nok{color:#ff9f9f}
+.toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-90px);background:#12b5c9;color:#06121f;padding:10px 20px;border-radius:12px;font-weight:600;transition:transform .45s cubic-bezier(.2,1.4,.4,1);z-index:9}
+.toast.show{transform:translate(-50%,0)}.toast.err{background:#ff9f9f}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="app">
+  <header>🛠 مدیریت پیامک</header>
+
+  <div class="card" id="login">
+    <h3>ورود مدیر</h3>
+    <input id="adm" type="password" placeholder="رمز مدیر (ADMIN_TOKEN)">
+    <button class="pri" id="go">ورود</button>
+  </div>
+
+  <div id="panel" class="hide">
+    <div class="card">
+      <h3>کاربر جدید</h3>
+      <input id="nName" placeholder="نام (مثلاً علی)">
+      <div class="row"><input id="nTok" placeholder="رمز شخصی (حداقل ۴ حرف)" dir="ltr"><button id="rnd" style="flex:0 0 auto;height:44px">🎲 تصادفی</button></div>
+      <input id="nQ" type="number" inputmode="numeric" placeholder="سهمیه (تعداد پیامک)" value="10">
+      <button class="pri" id="add">ساخت کاربر</button>
+    </div>
+    <div id="users"></div>
+    <div class="card"><h3 id="logT">آخرین ارسال‌ها</h3><div id="logs"></div></div>
+  </div>
+</div>
+
+<script>
+const WORKER="https://hidden-cherry-875a.asnadir361.workers.dev";
+const $=id=>document.getElementById(id);
+const fa=n=>Number(n).toLocaleString("fa-IR");
+let tok=sessionStorage.getItem("adm")||"",filter=0;
+let tt;function toast(t,err){const e=$("toast");e.textContent=t;e.className="toast show"+(err?" err":"");clearTimeout(tt);tt=setTimeout(()=>e.className="toast"+(err?" err":""),2800);}
+async function api(path,method="GET",body){
+  const r=await fetch(WORKER+path,{method,headers:{"Content-Type":"application/json","x-app-token":tok},body:body?JSON.stringify(body):undefined});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.message||("خطا "+r.status));
+  return d;
+}
+async function load(){
+  const [u,l]=await Promise.all([api("/admin/users"),api("/admin/logs"+(filter?"?user="+filter:""))]);
+  renderUsers(u.users);renderLogs(l.logs,u.users);
+}
+function renderUsers(list){
+  const box=$("users");box.innerHTML="";
+  if(!list.length){box.innerHTML='<div class="card"><small>هنوز کاربری نساخته‌ای</small></div>';return;}
+  list.forEach(u=>{
+    const rem=u.quota-u.used,pct=u.quota?Math.max(0,Math.min(100,rem/u.quota*100)):0;
+    const c=document.createElement("div");c.className="card u"+(u.active?"":" off");
+    c.innerHTML='<div class="row" style="align-items:center"><b></b><small style="text-align:left"></small></div><div class="bar"><i></i></div><small></small><div class="btns"></div>';
+    c.querySelector("b").textContent=u.name+(u.active?"":" (غیرفعال)");
+    c.querySelector("small").textContent="باقی‌مانده "+fa(rem)+" از "+fa(u.quota);
+    const i=c.querySelector("i");i.style.width=pct+"%";i.className=rem<=0?"zero":rem<=2?"low":"";
+    c.querySelectorAll("small")[1].textContent="مصرف‌شده: "+fa(u.used)+(u.last?" • آخرین ارسال: "+new Date(u.last).toLocaleString("fa-IR"):"");
+    const B=c.querySelector(".btns");
+    const btn=(t,f,cls)=>{const b=document.createElement("button");b.textContent=t;if(cls)b.className=cls;b.onclick=f;B.appendChild(b);};
+    const act=async(body,msg)=>{try{await api("/admin/user/"+u.id,"POST",body);toast(msg);load();}catch(e){toast(e.message,1);}};
+    [5,10,50].forEach(n=>btn("+"+fa(n),()=>act({add:n},"شارژ شد")));
+    btn("افزودن…",()=>{const n=parseInt(prompt("چند پیامک به سهمیه اضافه شود؟","10"),10);if(n)act({add:n},"شارژ شد");});
+    btn("تنظیم کل…",()=>{const n=parseInt(prompt("سهمیه کل (جمع همه) چند باشد؟",u.quota),10);if(n>=0)act({quota:n},"ذخیره شد");});
+    btn(u.active?"غیرفعال":"فعال",()=>act({active:!u.active},u.active?"غیرفعال شد":"فعال شد"));
+    btn("تغییر رمز",()=>{const t=prompt("رمز جدید (حداقل ۴ حرف):");if(t)act({token:t},"رمز عوض شد");});
+    btn("ارسال‌ها",()=>{filter=u.id;load();$("logT").scrollIntoView({behavior:"smooth"});});
+    btn("حذف",()=>{if(confirm("کاربر «"+u.name+"» حذف شود؟"))api("/admin/user/"+u.id,"DELETE").then(()=>{toast("حذف شد");load();});},"red");
+    box.appendChild(c);
+  });
+}
+function renderLogs(logs,users){
+  $("logT").textContent=filter?"ارسال‌های "+((users.find(x=>x.id===filter)||{}).name||"کاربر")+" (برای همه: دوباره ورود)":"آخرین ارسال‌ها";
+  if(filter)$("logT").onclick=()=>{filter=0;load();};
+  const box=$("logs");box.innerHTML="";
+  if(!logs.length){box.textContent="موردی نیست";return;}
+  logs.forEach(x=>{
+    const d=document.createElement("div");d.className="log";
+    const a=document.createElement("span");a.textContent=x.user_name+" • "+x.mobile+" • قالب "+x.template;
+    const b=document.createElement("span");b.className=x.ok?"okc":"nok";b.textContent=(x.ok?"✓ ":"✗ ")+new Date(x.ts).toLocaleString("fa-IR");
+    d.appendChild(a);d.appendChild(b);box.appendChild(d);
+  });
+}
+async function enter(){
+  tok=$("adm").value.trim()||tok;if(!tok)return;
+  try{await load();sessionStorage.setItem("adm",tok);$("login").classList.add("hide");$("panel").classList.remove("hide");}
+  catch(e){toast(e.message,1);}
+}
+$("go").onclick=enter;$("adm").onkeydown=e=>e.key==="Enter"&&enter();
+$("rnd").onclick=()=>{$("nTok").value=Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");};
+$("add").onclick=async()=>{
+  try{await api("/admin/user","POST",{name:$("nName").value,token:$("nTok").value,quota:$("nQ").value});
+    toast("کاربر ساخته شد؛ رمز: "+$("nTok").value);$("nName").value="";$("nTok").value="";load();}
+  catch(e){toast(e.message,1);}
+};
+if(tok){$("adm").value=tok;enter();}
+</script>
+</body>
+</html>
