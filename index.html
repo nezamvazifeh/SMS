@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
-<meta name="theme-color" content="#123047">
+<meta name="theme-color" content="#0b1022">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -62,15 +62,119 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
 .more-box{overflow:hidden;max-height:0;padding-top:0;transition:max-height .3s ease,padding .3s ease}
 .more-box.open{max-height:320px;padding-top:10px}
 .re{width:auto;margin-top:6px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:12px}
+
+/* ===== انیمیشن‌ها ===== */
+@keyframes dropIn{from{transform:translateY(-110%);opacity:0}to{transform:none;opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes barIn{from{transform:translateY(110%)}to{transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.55) translateY(8px)}60%{opacity:1;transform:scale(1.07)}100%{opacity:1;transform:none}}
+@keyframes selPop{0%{transform:scale(.9)}50%{transform:scale(1.09)}100%{transform:scale(1)}}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(12px) scale(.97);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+@keyframes fieldIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes sheen{from{transform:translateX(-150%)}to{transform:translateX(330%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rip{to{transform:scale(2.8);opacity:0}}
+@keyframes tbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 #d49a0055}50%{box-shadow:0 0 0 5px #d49a0000}}
+@keyframes confetti{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+.top{position:relative;overflow:hidden;animation:dropIn .7s cubic-bezier(.2,.85,.25,1) both}
+.top::after{content:"";position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(100deg,transparent,#ffffff18,transparent);animation:sheen 6s ease-in-out 1.5s infinite;pointer-events:none}
+.wrench{transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.wrench:active{transform:rotate(28deg) scale(.85);opacity:1}
+.chip{overflow:hidden;transition:transform .18s,background .3s,color .3s,border-color .3s,box-shadow .3s}
+.chip:active{transform:scale(.93)}
+.chip.fav:not(.on){box-shadow:0 2px 8px #d49a0022}
+.chip.on{animation:selPop .38s cubic-bezier(.3,1.4,.5,1);box-shadow:0 4px 14px #12304744}
+.chip.enter{animation:popIn .5s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i)*38ms + 280ms)}
+.chip.pop{animation:popIn .42s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:var(--d,0ms)}
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);animation:rip .65s ease-out forwards;pointer-events:none}
+.morebtn{transition:color .2s,letter-spacing .3s}.morebtn:active{letter-spacing:1px;color:var(--ink)}
+.phone{animation:riseIn .65s .4s cubic-bezier(.2,.8,.2,1) both}
+.bubble.swap{animation:bubbleIn .5s cubic-bezier(.2,.8,.2,1)}
+.bubble.swap .f{animation:fieldIn .45s cubic-bezier(.2,.9,.3,1.3) both;animation-delay:calc(var(--k)*70ms + 140ms)}
+.f{transition:width .22s cubic-bezier(.3,1.2,.5,1),background .25s,box-shadow .25s,border-color .25s}
+.f:focus{box-shadow:0 0 0 3px #d49a0050;border-bottom-color:#b07d00}
+.f.bad{box-shadow:0 0 0 3px #dc262633}
+.bar{animation:barIn .7s .55s cubic-bezier(.2,.85,.25,1) both}
+.bar input{transition:box-shadow .25s,border-color .25s}.bar input:focus{border-color:var(--teal);box-shadow:0 0 0 3px #0f766e30;outline:none}
+#send{position:relative;overflow:hidden;transition:transform .15s,box-shadow .25s;box-shadow:0 6px 16px #0f766e44}
+#send:active{transform:scale(.94)}
+#send.busy{color:transparent;pointer-events:none}
+#send.busy::after{content:"";position:absolute;inset:0;margin:auto;width:20px;height:20px;border:2.5px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .65s linear infinite}
+.keybox{animation:riseIn .4s cubic-bezier(.2,.8,.2,1) both}
+.toast{transition:transform .55s cubic-bezier(.2,1.4,.4,1);padding-bottom:16px;overflow:hidden}
+.toast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:#ffffff88;transform-origin:right;transform:scaleX(0)}
+.toast.show::after{animation:tbar 3.5s linear forwards}
+.msg{transition:opacity .3s}
+#hist.anim{animation:riseIn .5s cubic-bezier(.2,.8,.2,1)}
+#hist.anim .hi{animation:riseIn .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--k)*55ms + 100ms)}
+.tag.wait{animation:ring 1.8s ease-in-out infinite}
+.re,.hh button{transition:transform .15s}.re:active,.hh button:active{transform:scale(.92)}
+.cf{position:fixed;width:7px;height:11px;border-radius:2px;pointer-events:none;z-index:120;animation:confetti .95s cubic-bezier(.15,.7,.3,1) forwards}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ===== تم مدرن (روشن و تیره) ===== */
+:root{--g1:#3a5bff;--g2:#12b5c9;--grad:linear-gradient(135deg,var(--g1),var(--g2))}
+html{color-scheme:light}html[data-theme=dark]{color-scheme:dark}
+body{background:radial-gradient(70% 40% at 100% 0%,#c9d6ff90,transparent 70%),radial-gradient(60% 35% at 0% 28%,#bff3ea90,transparent 70%),#f3f6fc;background-attachment:fixed;color:#14203f}
+.top{background:linear-gradient(135deg,#142253,#2a4bb0)}
+.chip{background:#ffffffcc;border-color:#d5ddf0}
+.chip.fav:not(.on){border-color:#e8b24a;background:#fffaf0}
+.chip.on{background:var(--grad);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 6px 18px #3a5bff44}
+.phone{background:#ffffff8c;border:1px solid #ffffffcc;box-shadow:0 12px 32px #2a4bb01c}
+.bubble{background:var(--grad);color:#fff;border-radius:20px 20px 20px 5px;box-shadow:0 8px 20px #3a5bff33}
+.f{background:#ffe9a8;color:#3a2a00;border-bottom-color:#e0a21a}
+.f::placeholder{color:#8a6200;opacity:.75}
+.hint{color:#6b7a99}
+.bar{background:#ffffffe8;backdrop-filter:blur(14px)}
+#send{background:var(--grad);color:#fff;box-shadow:0 8px 20px #3a5bff44}
+.toast{background:var(--grad)}
+input{border-color:#d5ddf0}
+
+html[data-theme=dark] body{background:radial-gradient(60% 40% at 92% -5%,#3a4fe05a,transparent 70%),radial-gradient(50% 35% at 0% 36%,#12b8a238,transparent 70%),#080d1c;background-attachment:fixed;color:#e9eefb}
+[data-theme=dark] .top{background:rgba(255,255,255,.06);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.1);box-shadow:none}
+[data-theme=dark] .chip{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#e9eefb}
+[data-theme=dark] .chip.fav:not(.on){border-color:#ffd98a88;background:rgba(255,217,138,.07);box-shadow:0 0 14px #ffd98a22}
+[data-theme=dark] .chip.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 6px 20px #3a5bff66}
+[data-theme=dark] .phone{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);box-shadow:none}
+[data-theme=dark] .bubble{box-shadow:0 10px 28px #3a5bff40}
+[data-theme=dark] input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:#e9eefb}
+[data-theme=dark] input::placeholder{color:#7f8cab}
+[data-theme=dark] .f{color:#3a2a00}
+[data-theme=dark] .f.bad{background:#ff9a9a;color:#3a0000}
+[data-theme=dark] .f:focus{background:#ffd24d;box-shadow:0 0 0 3px #ffd98a55}
+[data-theme=dark] .bar{background:rgba(8,13,28,.8);border-top-color:rgba(255,255,255,.1)}
+[data-theme=dark] .bar input:focus{border-color:#3dd9c0;box-shadow:0 0 0 3px #3dd9c033}
+[data-theme=dark] #send{color:#fff;box-shadow:0 8px 24px #3a5bff66}
+[data-theme=dark] .keybox{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+[data-theme=dark] .keybox button{background:rgba(255,255,255,.14);color:#e9eefb}
+[data-theme=dark] .morebtn{color:#8e9bb8;border-top-color:rgba(255,255,255,.16)}
+[data-theme=dark] .morebtn:active{color:#fff}
+[data-theme=dark] .hint,[data-theme=dark] .raw{color:#8e9bb8}
+[data-theme=dark] .hi{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#e9eefb}
+[data-theme=dark] .re{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#e9eefb}
+[data-theme=dark] .hh{color:#e9eefb}
+[data-theme=dark] .hh button{background:rgba(255,255,255,.1);color:#e9eefb}
+[data-theme=dark] .tag.ok,[data-theme=dark] .ok{background:#3dd9c022;color:#7ff0dc}
+[data-theme=dark] .tag.err,[data-theme=dark] .err{background:#ff6b6b24;color:#ff9f9f}
+[data-theme=dark] .tag.op{background:#6d8bff24;color:#b2c1ff}
+[data-theme=dark] .tag.wait{background:#ffd98a22;color:#ffd98a}
+[data-theme=dark] input.f{background:#fff1b8;color:#2b2100;border:0;border-bottom:2px solid #f0b429;border-radius:5px}
+[data-theme=dark] input.f::placeholder{color:#8a6a14;opacity:.9}
+[data-theme=dark] input.f:focus{background:#ffe27a;box-shadow:0 0 0 3px #ffe27a66}
+[data-theme=dark] input.f.bad{background:#ffb8b8;color:#3a0000;border-bottom-color:#e5484d}
+.quota{margin-inline-start:auto;margin-inline-end:10px;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.13);font-size:11.5px;animation:popIn .4s both}
+.quota.low{background:#ffd98a33;color:#ffd98a}
+.quota.zero{background:#ff6b6b33;color:#ff9f9f}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 <div class="app">
-  <header class="top"><h1>ارسال پیامک</h1><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
+  <header class="top"><h1>ارسال پیامک</h1><span class="quota hide" id="quota"></span><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
   <main>
     <div class="keybox hide" id="keyBox">
-      <input id="key" type="password" dir="ltr" placeholder="API Key">
+      <input id="key" type="password" dir="ltr" placeholder="رمز شخصی">
       <button id="saveKey">ذخیره</button>
     </div>
     <div class="chips" id="chips"></div>
@@ -90,8 +194,10 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
 </div>
 
 <script>
-const API_URL="https://api.sms.ir/v1/send/verify";
-const REPORT_URL="https://api.sms.ir/v1/send/";
+// ===== آدرس Worker کلودفلر خودت را اینجا بگذار =====
+const WORKER="https://hidden-cherry-875a.asnadir361.workers.dev";
+const API_URL=WORKER+"/send";
+const REPORT_URL=WORKER+"/report/";
 const $=id=>document.getElementById(id);
 const ls={g(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const MARK="@";
@@ -137,39 +243,47 @@ let tt;
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),3500);}
 function msg(t,c){const o=$("out");o.textContent=t;o.className="msg "+c;o.style.display="block";}
 
-// ===== API Key (پشت علامت آچار) =====
-$("key").value=ls.g("sms_key","");
-const sk=()=>ls.s("sms_key",$("key").value.trim());
+// ===== رمز شخصی (پشت علامت آچار) =====
+try{localStorage.removeItem("sms_key")}catch(e){}
+$("key").value=ls.g("sms_token","");
+const sk=()=>ls.s("sms_token",$("key").value.trim());
 ["input","change","blur"].forEach(ev=>$("key").addEventListener(ev,sk));
 window.addEventListener("pagehide",sk);
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
 $("wrench").onclick=()=>$("keyBox").classList.toggle("hide");
-$("saveKey").onclick=()=>{if(!$("key").value.trim())return toast("API Key را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");};
+$("saveKey").onclick=()=>{if(!$("key").value.trim())return toast("رمز شخصی را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");loadMe();};
 
 // ===== انتخاب قالب =====
 let sel=Math.max(0,T.findIndex(t=>t.code===ls.g("sms_selc","")));
 function moreLabel(){const m=$("chipsMore");$("moreBtn").textContent=m.classList.contains("open")?"کمتر ▴":"بیشتر ("+T.filter(t=>!t.fav).length+") ▾";}
+let intro=true;
+function markSel(){document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on",+el.dataset.i===sel));}
+function ripple(el,e){const b=el.getBoundingClientRect(),d=Math.max(b.width,b.height),r=document.createElement("span");r.className="rip";
+  r.style.cssText="width:"+d+"px;height:"+d+"px;left:"+((e&&e.clientX||b.left+b.width/2)-b.left-d/2)+"px;top:"+((e&&e.clientY||b.top+b.height/2)-b.top-d/2)+"px";el.appendChild(r);setTimeout(()=>r.remove(),700);}
+function shake(el){try{el.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-4px)"},{transform:"translateX(0)"}],{duration:380,easing:"ease-in-out"})}catch(e){}}
 function renderChips(){
   const a=$("chips"),m=$("chipsMore");a.innerHTML="";m.innerHTML="";
   T.forEach((t,i)=>{
-    const b=document.createElement("button");b.className="chip"+(i===sel?" on":"");b.textContent=t.title;if(t.fav)b.classList.add("fav");if(t.title.length>12)b.classList.add("long");
-    b.onclick=()=>{sel=i;ls.s("sms_selc",t.code);renderChips();renderText();};
+    const b=document.createElement("button");b.className="chip"+(i===sel?" on":"")+(intro?" enter":"");b.dataset.i=i;b.style.setProperty("--i",i);b.textContent=t.title;
+    if(t.fav)b.classList.add("fav");if(t.title.length>12)b.classList.add("long");
+    b.onclick=e=>{ripple(b,e);sel=i;ls.s("sms_selc",t.code);markSel();renderText();};
     (t.fav?a:m).appendChild(b);
   });
   if(!T[sel].fav)m.classList.add("open");
-  moreLabel();
+  moreLabel();intro=false;
 }
-$("moreBtn").onclick=()=>{$("chipsMore").classList.toggle("open");moreLabel();};
+$("moreBtn").onclick=()=>{const m=$("chipsMore");m.classList.toggle("open");moreLabel();
+  if(m.classList.contains("open"))m.querySelectorAll(".chip").forEach((c,k)=>{c.style.setProperty("--d",k*32+"ms");c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop");});};
 const box=$("sms");
 const meas=document.createElement("span");meas.className="f meas";document.body.appendChild(meas);
 function fit(el){meas.textContent=el.value||el.placeholder;el.style.width=(meas.offsetWidth+10)+"px";}
 function renderText(){
-  box.innerHTML="";
+  box.innerHTML="";box.classList.remove("swap");void box.offsetWidth;box.classList.add("swap");
   T[sel].text.split(/(\{[A-Za-z0-9_]+(?:\|[^}]*)?\})/).forEach(p=>{
     const m=p.match(/^\{([A-Za-z0-9_]+)(?:\|([^}]*))?\}$/);
     if(m){
       const s=document.createElement("input");s.type="text";s.className="f";
-      s.dataset.n=m[1];s.placeholder=m[2]||LABELS[m[1]]||m[1];
+      s.dataset.n=m[1];s.style.setProperty("--k",box.querySelectorAll(".f").length);s.placeholder=m[2]||LABELS[m[1]]||m[1];
       s.autocomplete="off";s.autocapitalize="none";s.spellcheck=false;
       s.oninput=()=>{s.classList.remove("bad");fit(s);};
       s.onfocus=()=>{if(!document.body.classList.contains("editing")){prevY=window.scrollY;kbOpen=false;}document.body.classList.add("editing");[60,300,650].forEach(d=>setTimeout(up,d));};
@@ -197,6 +311,17 @@ if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>{
   else if(kbOpen&&h>baseH*0.92){clearTimeout(kbT);kbT=setTimeout(()=>{if(window.visualViewport.height>baseH*0.92){kbOpen=false;const a=document.activeElement;if(a&&a.blur)a.blur();}},90);}
 });
 
+function showQuota(d){
+  const q=$("quota");
+  if(d&&d.admin){q.textContent="مدیر · نامحدود";q.className="quota";return;}
+  if(!d||d.remaining==null){q.className="quota hide";return;}
+  q.textContent="باقی‌مانده: "+d.remaining;q.className="quota"+(d.remaining<=0?" zero":d.remaining<=2?" low":"");
+}
+async function loadMe(){
+  const key=$("key").value.trim();if(!key||WORKER.includes("YOUR-WORKER"))return;
+  try{const r=await fetch(WORKER+"/me",{headers:{"x-app-token":key}});showQuota(r.ok?await r.json():null);}catch(e){}
+}
+
 // نوار شماره موبایل مثل سربرگ کیبورد، دقیقاً بالای آن می‌نشیند
 const barEl=document.querySelector(".bar");
 function liftBar(){const v=window.visualViewport;if(!v)return;barEl.style.bottom=Math.max(0,window.innerHeight-v.height-v.offsetTop)+"px";}
@@ -204,14 +329,21 @@ if(window.visualViewport){window.visualViewport.addEventListener("resize",liftBa
 $("mobile").addEventListener("focus",()=>{setTimeout(liftBar,100);setTimeout(liftBar,350);});
 $("mobile").addEventListener("blur",()=>setTimeout(liftBar,100));
 
+function burst(){const r=$("send").getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,cols=["#ffd98a","#3dd9c0","#6d8bff","#ffffff","#f0a93a"];
+  for(let i=0;i<22;i++){const p=document.createElement("span");p.className="cf";const a=Math.random()*Math.PI*2,d=50+Math.random()*90;
+    p.style.cssText="left:"+x+"px;top:"+y+"px;background:"+cols[i%5]+";--dx:"+Math.cos(a)*d+"px;--dy:"+(Math.sin(a)*d-45)+"px;--rot:"+(Math.random()*720-360)+"deg";
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);}
+  try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}}
+
 // ===== ارسال =====
 $("send").onclick=async()=>{
   const key=$("key").value.trim(),t=T[sel],mobile=norm($("mobile").value);
-  if(!key){$("keyBox").classList.remove("hide");return msg("API Key را از علامت 🔧 بالای صفحه وارد کن","err");}
-  if(!/^09\d{9}$/.test(mobile))return msg("شماره موبایل معتبر نیست","err");
+  if(WORKER.includes("YOUR-WORKER"))return msg("آدرس Worker هنوز داخل فایل تنظیم نشده","err");
+  if(!key){$("keyBox").classList.remove("hide");return msg("رمز شخصی را از علامت 🔧 بالای صفحه وارد کن","err");}
+  if(!/^09\d{9}$/.test(mobile)){shake($("mobile"));return msg("شماره موبایل معتبر نیست","err");}
   const spans=[...box.querySelectorAll(".f")];
   const empty=spans.filter(x=>!x.value.trim());
-  if(empty.length){empty.forEach(x=>x.classList.add("bad"));return msg("بخش‌های قرمز را پر کن","err");}
+  if(empty.length){empty.forEach(x=>{x.classList.add("bad");shake(x);});return msg("بخش‌های قرمز را پر کن","err");}
   const parameters=spans.map(s=>({name:s.dataset.n,value:s.value.trim()}));
   const np=parameters.find(p=>p.name==="NAME")||parameters[0]||{value:""};
   const saved=parameters.map(p=>({n:p.name,v:p.value}));
@@ -222,20 +354,21 @@ $("send").onclick=async()=>{
   // در قالب‌های sms.ir جنسیت بعد از نام می‌آید؛ برای نمایش «آقای نام» مقدارها جابه‌جا فرستاده می‌شوند
   if(parameters.some(p=>p.name==="GENDER")&&parameters.some(p=>p.name==="NAME"))
     parameters.forEach(p=>{if(p.name==="GENDER")p.name="NAME";else if(p.name==="NAME")p.name="GENDER";});
-  $("send").disabled=true;msg("در حال ارسال...","ok");
+  $("send").disabled=true;$("send").classList.add("busy");msg("در حال ارسال...","ok");
   try{
     const r=await fetch(API_URL,{method:"POST",
-      headers:{"Content-Type":"application/json","Accept":"application/json","x-api-key":key},
+      headers:{"Content-Type":"application/json","Accept":"application/json","x-app-token":key},
       body:JSON.stringify({mobile,templateId:Number(t.code),parameters})});
     const d=await r.json().catch(()=>({}));
     if(r.ok&&d.status===1){
-      $("out").style.display="none";toast("✅ پیامک ارسال شد");
+      $("out").style.display="none";toast("✅ پیامک ارسال شد");burst();if(d._remaining!=null)showQuota({remaining:d._remaining});
       const h=loadH();h.unshift({id:d.data&&d.data.messageId,mobile,name:np.value,tpl:t.title,code:t.code,vals:saved,t:Date.now(),s:null});
       saveH(h);if(!$("hist").classList.contains("hide"))renderH();
-      $("mobile").value="";renderText();
+      $("mobile").value="";
+      try{box.animate([{transform:"none",opacity:1},{transform:"translateY(-70px) scale(.94)",opacity:0}],{duration:420,easing:"cubic-bezier(.5,0,.8,.4)"}).finished.then(renderText,renderText);}catch(e){renderText();}
     }else msg("❌ خطا: "+(d.message||r.status),"err");
   }catch(e){msg("❌ ارتباط برقرار نشد (احتمالاً CORS)","err");}
-  $("send").disabled=false;
+  $("send").disabled=false;$("send").classList.remove("busy");
 };
 
 // ===== تاریخچه =====
@@ -259,8 +392,8 @@ function renderH(){
   const grp=document.createElement("div");grp.style.cssText="display:flex;gap:6px";grp.appendChild(rb);grp.appendChild(cb);hh.appendChild(grp);
   b.appendChild(hh);
   if(!h.length){const e=document.createElement("div");e.className="hint";e.textContent="هنوز پیامکی ارسال نشده";b.appendChild(e);return;}
-  h.forEach(x=>{
-    const [txt,cls]=info(x.s),d=document.createElement("div");d.className="hi";
+  h.forEach((x,k)=>{
+    const [txt,cls]=info(x.s),d=document.createElement("div");d.className="hi";d.style.setProperty("--k",k);
     const bb=document.createElement("b");bb.textContent=(x.name||"-")+" — "+x.mobile;d.appendChild(bb);
     d.appendChild(document.createElement("br"));
     const tag=document.createElement("span");tag.className="tag "+cls;tag.textContent=txt;d.appendChild(tag);
@@ -279,12 +412,12 @@ function resend(x){
   toast("🔁 آماده ارسال؛ شماره را بنویس");$("mobile").focus();
 }
 async function refreshH(){
-  const key=$("key").value.trim();if(!key)return toast("اول API Key را از 🔧 وارد کن");
+  const key=$("key").value.trim();if(!key)return toast("اول رمز شخصی را از 🔧 وارد کن");
   const h=loadH();
   for(const x of h){
     if(!x.id||x.s===1||x.s===2)continue;
     try{
-      const r=await fetch(REPORT_URL+x.id,{headers:{"Accept":"application/json","x-api-key":key}});
+      const r=await fetch(REPORT_URL+x.id,{headers:{"Accept":"application/json","x-app-token":key}});
       const d=await r.json();
       if(d&&d.data)x.s=(d.data.deliveryState===undefined?null:d.data.deliveryState);
     }catch(e){}
@@ -293,8 +426,9 @@ async function refreshH(){
 }
 $("histBtn").onclick=()=>{
   const b=$("hist");b.classList.toggle("hide");
-  if(!b.classList.contains("hide")){renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
+  if(!b.classList.contains("hide")){b.classList.add("anim");setTimeout(()=>b.classList.remove("anim"),1200);renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
 };
+loadMe();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
