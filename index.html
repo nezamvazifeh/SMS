@@ -252,7 +252,11 @@ const ALL=[
  ["306627","معافیت تحصیلی",P+"معافیت تحصیلی با شناسه {ID} تایید شد.\nواحد {UNIT}"],
  ["473153","کد صحت","متقاضی گرامی جهت استعلام کد صحت را وارد کنید.\nکد صحت: {CODE|کد صحت}\nواحد {UNIT}"],
  ["914453","واحد مالی",P+"درخواست شما با شناسه پرداخت {ID} به واحد مالی ارجاع داده شد.\nواحد {UNIT}"],
- ["743216","احراز هویت","{GENDER} {NAME} با کد ملی {NATIONALID}\nپس از تاییدیه احراز هویت در مورخ {TIME|تاریخ} مراحل ثبت شرایط مجوز شما با موفقیت انجام شد.\nواحد {UNIT}"]
+ ["743216","احراز هویت","{GENDER} {NAME} با کد ملی {NATIONALID}\nپس از تاییدیه احراز هویت در مورخ {TIME|تاریخ} مراحل ثبت شرایط مجوز شما با موفقیت انجام شد.\nواحد {UNIT}"],
+ ["527919","هویتی","متقاضی گرامی {GENDER} {NAME} با شناسه هویتی {NATIONALID} درخواست کارت {CODE|نوع کارت} و مدارک هویتی شما با شناسه {ID} درحال بررسی می‌باشد.\nواحد {UNIT}"],
+ ["693570","وزارت","درخواست وزارت ثبت و ارجاع گردید.\nشناسه تایید: {CODE|شناسه تایید}\nواحد وزارت"],
+ ["864445","باقی مانده واحد","{GENDER} {NAME} با کد ملی {NATIONALID} در مورخ {TIME|تاریخ} تعداد {CODE|تعداد} واحد درسی از واحد های باقی مانده در مقطع {DEGREE} و رشته {FIELD} با موفقیت به ثبت رسید.\nواحد {UNIT}"],
+ ["577580","دانشگاه درحال بررسی",P+"دانشنامه {DEGREE} شما در رشته {FIELD} با شناسه {ID} درحال بررسی می‌باشد.\nواحد {UNIT}"]
 ].map(a=>({code:a[0],title:a[1],text:a[2]}));
 const FAV=["955721","318623","747266","187027","127086","396824","353394","860164","910708","914453","743216"];
 const T=FAV.map(c=>ALL.find(x=>x.code===c)).concat(ALL.filter(x=>!FAV.includes(x.code)));
@@ -343,12 +347,19 @@ function showQuota(d){
 }
 async function loadMe(){
   const key=tokenVal();if(!key||WORKER.includes("YOUR-WORKER"))return;
-  try{
-    const r=await fetch(WORKER+"/me",{headers:{"x-app-token":key}}),d=await r.json().catch(()=>null);
-    if(r.status===403&&d&&d.message){const q=$("quota");q.textContent="⛔ مسدود";q.className="quota zero";msg(d.message,"err");return;}
-    showQuota(r.ok?d:null);
-  }catch(e){}
+  const q=$("quota");
+  for(let a=0;a<2;a++){
+    try{
+      const r=await fetch(WORKER+"/me",{headers:{"x-app-token":key},signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(12000):undefined});
+      const d=await r.json().catch(()=>null);
+      if(r.status===401){q.textContent="🔑 رمز اشتباه است";q.className="quota zero";return;}
+      if(r.status===403&&d&&d.message){q.textContent="⛔ مسدود";q.className="quota zero";msg(d.message,"err");return;}
+      showQuota(r.ok?d:null);return;
+    }catch(e){await new Promise(z=>setTimeout(z,1200));}
+  }
+  q.textContent="⚠️ اعتبار نامشخص؛ لمس کن";q.className="quota low"; // ارتباط برقرار نشد
 }
+$("quota").onclick=loadMe;
 
 // نوار شماره موبایل مثل سربرگ کیبورد، دقیقاً بالای آن می‌نشیند
 const barEl=document.querySelector(".bar");
