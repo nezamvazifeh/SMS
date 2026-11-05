@@ -65,14 +65,22 @@ const fa=n=>Number(n).toLocaleString("fa-IR");
 let tok=sessionStorage.getItem("adm")||"",filter=0;
 let tt;function toast(t,err){const e=$("toast");e.textContent=t;e.className="toast show"+(err?" err":"");clearTimeout(tt);tt=setTimeout(()=>e.className="toast"+(err?" err":""),2800);}
 async function api(path,method="GET",body){
-  const r=await fetch(WORKER+path,{method,headers:{"Content-Type":"application/json","x-app-token":tok},body:body?JSON.stringify(body):undefined});
+  let r,last;
+  for(let t=0;t<2;t++){ // یک بار تلاش دوباره اگر ارتباط قطع شد
+    try{
+      r=await fetch(WORKER+path,{method,headers:{"Content-Type":"application/json","x-app-token":tok},body:body?JSON.stringify(body):undefined,
+        signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(20000):undefined});
+      break;
+    }catch(e){last=e;await new Promise(z=>setTimeout(z,1200));}
+  }
+  if(!r)throw new Error("اتصال به سرور برقرار نشد؛ اینترنت را بررسی کن (آدرس Worker را در مرورگر باز کن، اگر باز نشد شبکه‌ات آن را بسته)");
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.message||("خطا "+r.status));
   return d;
 }
 async function load(){
-  const [u,l,v]=await Promise.all([api("/admin/users"),api("/admin/logs"+(filter?"?user="+filter:"")),api("/admin/violations")]);
-  renderUsers(u.users);renderLogs(l.logs,u.users);renderViol(v.violations);
+  const o=await api("/admin/overview"+(filter?"?user="+filter:""));
+  renderUsers(o.users);renderLogs(o.logs,o.users);renderViol(o.violations);
 }
 function renderUsers(list){
   const box=$("users");box.innerHTML="";
@@ -123,7 +131,7 @@ function renderViol(list){
   });
 }
 async function enter(){
-  tok=$("adm").value.trim()||tok;if(!tok)return;
+  tok=$("adm").value.replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[^\x21-\x7E]/g,"")||tok;if(!tok)return;
   try{await load();sessionStorage.setItem("adm",tok);$("login").classList.add("hide");$("panel").classList.remove("hide");}
   catch(e){toast(e.message,1);}
 }
