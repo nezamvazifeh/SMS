@@ -75,12 +75,19 @@ async function api(path,method="GET",body){
   }
   if(!r)throw new Error("اتصال به سرور برقرار نشد؛ اینترنت را بررسی کن (آدرس Worker را در مرورگر باز کن، اگر باز نشد شبکه‌ات آن را بسته)");
   const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.message||("خطا "+r.status));
+  if(!r.ok){const er=new Error(d.message||("خطا "+r.status));er.status=r.status;throw er;}
   return d;
 }
 async function load(){
-  const o=await api("/admin/overview"+(filter?"?user="+filter:""));
-  renderUsers(o.users);renderLogs(o.logs,o.users);renderViol(o.violations);
+  const q=filter?"?user="+filter:"";
+  let o;
+  try{ o=await api("/admin/overview"+q); }
+  catch(e){
+    if(e.status!==404)throw e; // Worker قدیمی‌تر است: همان سه مسیر قبلی
+    const [u,l,v]=await Promise.all([api("/admin/users"),api("/admin/logs"+q),api("/admin/violations").catch(()=>({violations:[]}))]);
+    o={users:u.users,logs:l.logs,violations:v.violations||[]};
+  }
+  renderUsers(o.users);renderLogs(o.logs,o.users);renderViol(o.violations||[]);
 }
 function renderUsers(list){
   const box=$("users");box.innerHTML="";
