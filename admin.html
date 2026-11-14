@@ -15,20 +15,37 @@ header{padding:18px 4px;font-weight:800;font-size:17px}
 h3{margin:0 0 10px;font-size:14px;color:#b8c4e0}
 input{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#e9eefb;font:inherit;margin-bottom:8px}
 button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 12px;background:rgba(255,255,255,.12);color:#e9eefb;transition:transform .15s}
-button:active{transform:scale(.94)}
+button:active{transform:scale(.94)}button:disabled{opacity:.35}
 .pri{background:linear-gradient(135deg,#3a5bff,#12b5c9);color:#fff;font-weight:600;width:100%;padding:12px}
 .row{display:flex;gap:8px}.row>*{flex:1}
-.u{display:flex;flex-direction:column;gap:8px}
-.u b{font-size:15px}.u small{color:#8e9bb8}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.sum div{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:14px;padding:10px 6px;text-align:center}
+.sum b{display:block;font-size:19px;margin-bottom:2px}.sum span{font-size:11.5px;color:#9fb0d0}
+.u{display:flex;flex-direction:column;gap:7px}
+.utop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.utop b{font-size:15px}
+.tok{font-size:12px;padding:5px 10px;background:rgba(255,217,138,.13);color:#ffd98a;direction:ltr;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.big{font-size:21px;font-weight:800;background:linear-gradient(135deg,#7ff0dc,#9bb0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.big.low{background:none;color:#ffd98a}.big.zero{background:none;color:#ff9f9f}
+.u small{color:#8e9bb8;line-height:1.7}
 .bar{height:6px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,#3dd9c0,#6d8bff);transition:width .5s}
 .bar i.low{background:#ffd98a}.bar i.zero{background:#ff6b6b}
 .btns{display:flex;flex-wrap:wrap;gap:6px}.btns button{font-size:12.5px;padding:7px 10px}
+.btns .pm{font-size:17px;padding:2px 14px;font-weight:800}
 .off{opacity:.55}
 .red{background:#ff6b6b30;color:#ff9f9f}
+.chipx{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.09);border-radius:20px;padding:5px 6px 5px 12px;font-size:13px}
+.chipx button{padding:0 7px;font-size:15px;background:rgba(255,107,107,.25);color:#ff9f9f;border-radius:50%}
 .log{font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px}
 .log:last-child{border:0}.okc{color:#7ff0dc}.nok{color:#ff9f9f}
-.toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-90px);background:#12b5c9;color:#06121f;padding:10px 20px;border-radius:12px;font-weight:600;transition:transform .45s cubic-bezier(.2,1.4,.4,1);z-index:9}
+/* ===== چرخ ارسال‌ها (مثل لاستیک می‌چرخد) ===== */
+.wheel{position:relative;height:250px;overflow-y:auto;perspective:650px;scroll-snap-type:y proximity;overscroll-behavior:contain;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(transparent 0,#000 26%,#000 74%,transparent 100%);mask-image:linear-gradient(transparent 0,#000 26%,#000 74%,transparent 100%)}
+.wheel::-webkit-scrollbar{display:none}
+.wheel .pad{height:100px;flex:none}
+.wheel .log{scroll-snap-align:center;margin:7px 6px;padding:11px 12px;border:0;border-radius:12px;background:rgba(255,255,255,.07);flex-wrap:wrap;will-change:transform,opacity}
+.toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-90px);background:#12b5c9;color:#06121f;padding:10px 20px;border-radius:12px;font-weight:600;transition:transform .45s cubic-bezier(.2,1.4,.4,1);z-index:9;max-width:90vw;text-align:center}
 .toast.show{transform:translate(-50%,0)}.toast.err{background:#ff9f9f}
 .hide{display:none}
 </style>
@@ -45,14 +62,25 @@ button:active{transform:scale(.94)}
   </div>
 
   <div id="panel" class="hide">
+    <div class="sum" id="sum"></div>
+
     <div class="card">
       <h3>کاربر جدید</h3>
       <input id="nName" placeholder="نام (مثلاً علی)">
       <div class="row"><input id="nTok" placeholder="رمز شخصی (حداقل ۴ حرف)" dir="ltr"><button id="rnd" style="flex:0 0 auto;height:44px">🎲 تصادفی</button></div>
-      <input id="nQ" type="number" inputmode="numeric" placeholder="سهمیه (تعداد پیامک)" value="10">
+      <input id="nQ" type="number" inputmode="numeric" placeholder="اعتبار اولیه (تعداد پیامک)" value="1">
       <button class="pri" id="add">ساخت کاربر</button>
     </div>
+
+    <input id="uq" placeholder="🔎 جستجوی کاربر…">
     <div id="users"></div>
+
+    <div class="card">
+      <h3>🏙 واحدهای مجاز اضافه (علاوه بر مرکز، مرکزی، تهران ..., شهرها)</h3>
+      <div class="row"><input id="wIn" placeholder="مثلاً تهران شرق"><button id="wAdd" style="flex:0 0 auto;height:44px">افزودن</button></div>
+      <div id="units" class="btns"></div>
+    </div>
+
     <div class="card"><h3 id="logT">آخرین ارسال‌ها</h3><div id="logs"></div></div>
     <div class="card"><h3>⚠️ تخلف‌ها (متن نامناسب)</h3><div id="viol"></div></div>
   </div>
@@ -61,17 +89,20 @@ button:active{transform:scale(.94)}
 <script>
 const WORKER="https://hidden-cherry-875a.asnadir361.workers.dev";
 const $=id=>document.getElementById(id);
-const fa=n=>Number(n).toLocaleString("fa-IR");
-let tok=sessionStorage.getItem("adm")||"",filter=0;
+const fa=n=>Number(n||0).toLocaleString("fa-IR");
+const dt=t=>t?new Date(t).toLocaleString("fa-IR"):"—";
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;};
+let tok=sessionStorage.getItem("adm")||"",filter=0,users=[],uq="";
 let tt;function toast(t,err){const e=$("toast");e.textContent=t;e.className="toast show"+(err?" err":"");clearTimeout(tt);tt=setTimeout(()=>e.className="toast"+(err?" err":""),2800);}
+
 async function api(path,method="GET",body){
-  let r,last;
+  let r;
   for(let t=0;t<2;t++){ // یک بار تلاش دوباره اگر ارتباط قطع شد
     try{
       r=await fetch(WORKER+path,{method,headers:{"Content-Type":"application/json","x-app-token":tok},body:body?JSON.stringify(body):undefined,
         signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(20000):undefined});
       break;
-    }catch(e){last=e;await new Promise(z=>setTimeout(z,1200));}
+    }catch(e){await new Promise(z=>setTimeout(z,1200));}
   }
   if(!r)throw new Error("اتصال به سرور برقرار نشد؛ اینترنت را بررسی کن (آدرس Worker را در مرورگر باز کن، اگر باز نشد شبکه‌ات آن را بسته)");
   const d=await r.json().catch(()=>({}));
@@ -87,66 +118,112 @@ async function load(){
     const [u,l,v]=await Promise.all([api("/admin/users"),api("/admin/logs"+q),api("/admin/violations").catch(()=>({violations:[]}))]);
     o={users:u.users,logs:l.logs,violations:v.violations||[]};
   }
-  renderUsers(o.users);renderLogs(o.logs,o.users);renderViol(o.violations||[]);
+  users=o.users||[];
+  renderSum();renderUsers();renderLogs(o.logs||[]);renderViol(o.violations||[]);renderUnits(o.units||[]);
 }
-function renderUsers(list){
+function renderSum(){
+  const act=users.filter(u=>u.active),low=act.filter(u=>u.quota-u.used<=2).length,today=users.reduce((s,u)=>s+(u.today||0),0);
+  const box=$("sum");box.innerHTML="";
+  [["کاربران",users.length],["ارسال امروز",today],["اعتبار کم",low]].forEach(([k,v])=>{const d=el("div");d.appendChild(el("b",null,fa(v)));d.appendChild(el("span",null,k));box.appendChild(d);});
+}
+function copy(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(()=>toast("رمز کپی شد"),()=>prompt("رمز:",t));
+  prompt("رمز:",t);return Promise.resolve();
+}
+function renderUsers(){
   const box=$("users");box.innerHTML="";
-  if(!list.length){box.innerHTML='<div class="card"><small>هنوز کاربری نساخته‌ای</small></div>';return;}
+  const list=users.filter(u=>!uq||u.name.toLowerCase().includes(uq.toLowerCase()));
+  if(!list.length){box.appendChild(el("div","card",users.length?"کاربری با این نام نیست":"هنوز کاربری نساخته‌ای"));return;}
   list.forEach(u=>{
-    const rem=u.quota-u.used,pct=u.quota?Math.max(0,Math.min(100,rem/u.quota*100)):0;
-    const c=document.createElement("div");c.className="card u"+(u.active?"":" off");
-    c.innerHTML='<div class="row" style="align-items:center"><b></b><small style="text-align:left"></small></div><div class="bar"><i></i></div><small></small><div class="btns"></div>';
-    const blk=u.blocked_until>Date.now();
-    c.querySelector("b").textContent=u.name+(u.active?"":" (غیرفعال)")+(blk?" ⛔ مسدود":"");
-    c.querySelector("small").textContent="باقی‌مانده "+fa(rem)+" از "+fa(u.quota);
-    const i=c.querySelector("i");i.style.width=pct+"%";i.className=rem<=0?"zero":rem<=2?"low":"";
-    c.querySelectorAll("small")[1].textContent="مصرف‌شده: "+fa(u.used)+(u.last?" • آخرین ارسال: "+new Date(u.last).toLocaleString("fa-IR"):"")+(u.strikes?" • تخلف: "+fa(u.strikes):"")+(blk?" • مسدود تا "+new Date(u.blocked_until).toLocaleString("fa-IR"):"");
-    const B=c.querySelector(".btns");
-    const btn=(t,f,cls)=>{const b=document.createElement("button");b.textContent=t;if(cls)b.className=cls;b.onclick=f;B.appendChild(b);};
+    const rem=Math.max(u.quota-u.used,0),pct=u.quota?Math.min(100,rem/u.quota*100):0,blk=u.blocked_until>Date.now();
+    const cls=rem<=0?"zero":rem<=2?"low":"";
+    const c=el("div","card u"+(u.active?"":" off"));
+    const top=el("div","utop");
+    top.appendChild(el("b",null,u.name+(u.active?"":" (غیرفعال)")+(blk?" ⛔ مسدود":"")));
+    const tk=el("button","tok","🔑 "+(u.token||"—"));
+    tk.onclick=()=>u.token?copy(u.token):toast("رمز این کاربر ذخیره نشده؛ «تغییر رمز» را بزن",1);
+    top.appendChild(tk);c.appendChild(top);
+    c.appendChild(el("div","big "+cls,fa(rem)+" عدد مانده"));
+    const bar=el("div","bar"),i=el("i",cls);i.style.width=pct+"%";bar.appendChild(i);c.appendChild(bar);
+    c.appendChild(el("small",null,"ارسال موفق: "+fa(u.sent)+" • امروز: "+fa(u.today)+" • ساخته‌شده: "+dt(u.created)));
+    c.appendChild(el("small",null,"آخرین ارسال: "+dt(u.last)+(u.strikes?" • تخلف: "+fa(u.strikes):"")+(blk?" • مسدود تا "+dt(u.blocked_until):"")));
+    const B=el("div","btns");
+    const btn=(t,f,k,dis)=>{const b=el("button",k||"",t);b.onclick=f;if(dis)b.disabled=true;B.appendChild(b);};
     const act=async(body,msg)=>{try{await api("/admin/user/"+u.id,"POST",body);toast(msg);load();}catch(e){toast(e.message,1);}};
+    btn("−",()=>act({add:-1},"یکی کم شد"),"pm",rem<=0);
+    btn("+",()=>act({add:1},"یکی اضافه شد"),"pm");
     [5,10,50].forEach(n=>btn("+"+fa(n),()=>act({add:n},"شارژ شد")));
-    btn("افزودن…",()=>{const n=parseInt(prompt("چند پیامک به سهمیه اضافه شود؟","10"),10);if(n)act({add:n},"شارژ شد");});
-    btn("تنظیم کل…",()=>{const n=parseInt(prompt("سهمیه کل (جمع همه) چند باشد؟",u.quota),10);if(n>=0)act({quota:n},"ذخیره شد");});
+    btn("صفر",()=>{if(confirm("اعتبار «"+u.name+"» صفر شود؟"))act({quota:u.used},"اعتبار صفر شد");},"red",rem<=0);
+    btn("افزودن…",()=>{const n=parseInt(prompt("چند پیامک اضافه شود؟ (منفی هم می‌شود)","10"),10);if(n)act({add:n},"انجام شد");});
+    btn("تنظیم کل…",()=>{const n=parseInt(prompt("اعتبار کل (جمع همه) چند باشد؟",u.quota),10);if(n>=0)act({quota:n},"ذخیره شد");});
     if(u.strikes>0||blk||!u.active)btn("رفع مسدودی",()=>act({unblock:true},"مسدودی برداشته شد"));
     btn(u.active?"غیرفعال":"فعال",()=>act({active:!u.active},u.active?"غیرفعال شد":"فعال شد"));
     btn("تغییر رمز",()=>{const t=prompt("رمز جدید (حداقل ۴ حرف):");if(t)act({token:t},"رمز عوض شد");});
     btn("ارسال‌ها",()=>{filter=u.id;load();$("logT").scrollIntoView({behavior:"smooth"});});
     btn("حذف",()=>{if(confirm("کاربر «"+u.name+"» حذف شود؟"))api("/admin/user/"+u.id,"DELETE").then(()=>{toast("حذف شد");load();});},"red");
-    box.appendChild(c);
+    c.appendChild(B);box.appendChild(c);
   });
 }
-function renderLogs(logs,users){
-  $("logT").textContent=filter?"ارسال‌های "+((users.find(x=>x.id===filter)||{}).name||"کاربر")+" (برای همه: دوباره ورود)":"آخرین ارسال‌ها";
-  if(filter)$("logT").onclick=()=>{filter=0;load();};
-  const box=$("logs");box.innerHTML="";
-  if(!logs.length){box.textContent="موردی نیست";return;}
-  logs.forEach(x=>{
-    const d=document.createElement("div");d.className="log";
-    const a=document.createElement("span");a.textContent=x.user_name+" • "+x.mobile+" • قالب "+x.template;
-    const b=document.createElement("span");b.className=x.ok?"okc":"nok";b.textContent=(x.ok?"✓ ":"✗ ")+new Date(x.ts).toLocaleString("fa-IR");
-    d.appendChild(a);d.appendChild(b);box.appendChild(d);
+function renderUnits(list){
+  const box=$("units");box.innerHTML="";
+  if(!list.length){box.appendChild(el("small",null,"موردی اضافه نشده"));return;}
+  list.forEach(x=>{
+    const c=el("span","chipx");c.appendChild(el("span",null,x.word));
+    const b=el("button",null,"×");b.onclick=()=>api("/admin/unit/"+x.id,"DELETE").then(()=>{toast("حذف شد");load();}).catch(e=>toast(e.message,1));
+    c.appendChild(b);box.appendChild(c);
   });
+}
+// ===== چرخ: وسط واضح، بالا و پایین کج و کم‌رنگ؛ مثل لاستیک می‌چرخد =====
+function spin(w){
+  const c=w.getBoundingClientRect(),mid=c.top+c.height/2;
+  w.querySelectorAll(".log").forEach(e=>{
+    const r=e.getBoundingClientRect(),d=((r.top+r.height/2)-mid)/(c.height/2),a=Math.min(Math.abs(d),1.3);
+    e.style.transform="rotateX("+(-d*46)+"deg) scale("+(1-a*.14)+") translateZ("+(-a*45)+"px)";
+    e.style.opacity=Math.max(0,1-a*.8);
+  });
+}
+function renderLogs(logs){
+  const lt=$("logT"),f=users.find(x=>x.id===filter);
+  lt.textContent=filter?"ارسال‌های "+(f?f.name:"کاربر")+" (برای برگشت لمس کن)":"آخرین ارسال‌ها";
+  lt.onclick=filter?(()=>{filter=0;load();}):null;
+  const box=$("logs");box.innerHTML="";box.className="";
+  if(!logs.length){box.textContent="موردی نیست";return;}
+  box.className="wheel";
+  box.appendChild(el("div","pad"));
+  logs.forEach(x=>{
+    const d=el("div","log");
+    d.appendChild(el("span",null,x.user_name+" • "+x.mobile+" • قالب "+x.template));
+    d.appendChild(el("span",x.ok?"okc":"nok",(x.ok?"✓ ":"✗ ")+dt(x.ts)));
+    box.appendChild(d);
+  });
+  box.appendChild(el("div","pad"));
+  box.onscroll=()=>{if(!box._r)box._r=requestAnimationFrame(()=>{box._r=0;spin(box);});};
+  spin(box);
 }
 function renderViol(list){
   const box=$("viol");box.innerHTML="";
   if(!list.length){box.textContent="تخلفی ثبت نشده 👌";return;}
   list.forEach(x=>{
-    const d=document.createElement("div");d.className="log";
-    const l=document.createElement("span");l.textContent=x.user_name+" • «"+x.value+"» در "+x.field+" ("+x.reason+")";
-    const r=document.createElement("span");r.className="nok";r.textContent=new Date(x.ts).toLocaleString("fa-IR");
-    d.appendChild(l);d.appendChild(r);box.appendChild(d);
+    const d=el("div","log");
+    d.appendChild(el("span",null,x.user_name+" • «"+x.value+"» در "+x.field+" ("+x.reason+")"));
+    d.appendChild(el("span","nok",dt(x.ts)));box.appendChild(d);
   });
 }
 async function enter(){
   tok=$("adm").value.replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[^\x21-\x7E]/g,"")||tok;if(!tok)return;
-  try{await load();sessionStorage.setItem("adm",tok);$("login").classList.add("hide");$("panel").classList.remove("hide");}
+  try{await load();sessionStorage.setItem("adm",tok);$("login").classList.add("hide");$("panel").classList.remove("hide");spin($("logs"));}
   catch(e){toast(e.message,1);}
 }
 $("go").onclick=enter;$("adm").onkeydown=e=>e.key==="Enter"&&enter();
+$("uq").oninput=()=>{uq=$("uq").value.trim();renderUsers();};
 $("rnd").onclick=()=>{$("nTok").value=Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");};
 $("add").onclick=async()=>{
   try{await api("/admin/user","POST",{name:$("nName").value,token:$("nTok").value,quota:$("nQ").value});
-    toast("کاربر ساخته شد؛ رمز: "+$("nTok").value);$("nName").value="";$("nTok").value="";load();}
+    toast("کاربر ساخته شد؛ رمز: "+$("nTok").value);$("nName").value="";$("nTok").value="";$("nQ").value="1";load();}
+  catch(e){toast(e.message,1);}
+};
+$("wAdd").onclick=async()=>{
+  try{await api("/admin/unit","POST",{word:$("wIn").value});toast("اضافه شد");$("wIn").value="";load();}
   catch(e){toast(e.message,1);}
 };
 if(tok){$("adm").value=tok;enter();}
