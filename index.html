@@ -90,8 +90,6 @@ body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #123
 .rip{position:absolute;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);animation:rip .65s ease-out forwards;pointer-events:none}
 .morebtn{transition:color .2s,letter-spacing .3s}.morebtn:active{letter-spacing:1px;color:var(--ink)}
 .phone{animation:riseIn .65s .4s cubic-bezier(.2,.8,.2,1) both}
-.bubble.swap{animation:bubbleIn .5s cubic-bezier(.2,.8,.2,1)}
-.bubble.swap .f{animation:fieldIn .45s cubic-bezier(.2,.9,.3,1.3) both;animation-delay:calc(var(--k)*70ms + 140ms)}
 .f{transition:width .22s cubic-bezier(.3,1.2,.5,1),background .25s,box-shadow .25s,border-color .25s}
 .f:focus{box-shadow:0 0 0 3px #d49a0050;border-bottom-color:#b07d00}
 .f.bad{box-shadow:0 0 0 3px #dc262633}
@@ -185,6 +183,17 @@ html[data-theme=light] body{background:radial-gradient(70% 40% at 100% 0%,#fbf5e
 .gl b{display:block;font-size:16px;margin:6px 0 4px}
 .gl p{margin:0 0 16px;font-size:14px;line-height:1.9;color:#33405f}
 .gl button{width:100%;margin:0;padding:11px;border:0;border-radius:14px;background:var(--grad);color:#fff;font-weight:600;font-size:15px}
+/* ===== دکمه‌های قالب سه‌بعدی ===== */
+.chip.enter,.chip.pop{animation-fill-mode:backwards}
+[data-theme=light] .chip{background:linear-gradient(180deg,#fffdf8,#f0e8d6);border:1px solid #d3c7ab;border-bottom-color:#bcae8e;box-shadow:0 3px 0 #c7b996,0 9px 14px #6b5b3a26,inset 0 1px 0 #fff;transform:translateY(0);transition:transform .12s,box-shadow .12s,background .25s,color .25s}
+[data-theme=light] .chip:active{transform:translateY(3px);box-shadow:0 0 0 #c7b996,0 2px 5px #6b5b3a30,inset 0 1px 0 #fff}
+[data-theme=light] .chip.fav:not(.on){background:linear-gradient(180deg,#fffaf0,#f6e3b4);border-color:#d9a640;border-bottom-color:#c08a22;box-shadow:0 3px 0 #c8962c,0 9px 14px #c8962c33,inset 0 1px 0 #fff}
+[data-theme=light] .chip.on{background:linear-gradient(180deg,#6483ff,#3358f0 55%,#10a9c0);border-color:#2a43c4;border-bottom-color:#1f33a0;color:#fff;text-shadow:0 1px 1px #0005;box-shadow:0 3px 0 #1f33a0,0 11px 20px #3a5bff55,inset 0 1px 0 #ffffff88,inset 0 -2px 5px #0003}
+[data-theme=light] .chip.on:active{box-shadow:0 0 0 #1f33a0,0 3px 8px #3a5bff55,inset 0 1px 0 #ffffff88,inset 0 -2px 5px #0003}
+.chips{padding-bottom:4px}
+.snack{position:fixed;left:50%;bottom:86px;transform:translate(-50%,26px);max-width:min(92vw,430px);display:flex;gap:10px;align-items:center;padding:11px 16px;border-radius:16px;font-size:13.5px;line-height:1.7;color:#7a1f1f;background:rgba(255,238,238,.86);border:1px solid rgba(214,80,80,.38);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 26px rgba(120,40,40,.22);opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.2,1.3,.4,1),opacity .25s;z-index:150}
+.snack.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.snack b{cursor:pointer;opacity:.55;font-weight:400}
 </style>
 </head>
 <body>
@@ -207,7 +216,7 @@ html[data-theme=light] body{background:radial-gradient(70% 40% at 100% 0%,#fbf5e
     <div class="hide" id="hist"></div>
   </main>
   <footer class="bar">
-    <input id="mobile" inputmode="numeric" placeholder="09123456789">
+    <input id="mobile" inputmode="numeric" placeholder="09123456789" list="recentNums" autocomplete="off"><datalist id="recentNums"></datalist>
     <button id="send">ارسال</button>
   </footer>
 </div>
@@ -222,6 +231,11 @@ const ls={g(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e
 const MARK="@";
 function validNID(v){v=norm(v);if(!/^\d{10}$/.test(v)||/^(\d)\1{9}$/.test(v))return false;let n=0;for(let i=0;i<9;i++)n+=+v[i]*(10-i);const r=n%11,c=+v[9];return r<2?c===r:c===11-r;}
 const norm=v=>v.trim().replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632);
+function cleanMobile(v){ // +98 / 0098 / فاصله / خط تیره / ارقام فارسی → 09xxxxxxxxx
+  let d=norm(String(v)).replace(/\D/g,"");
+  if(d.startsWith("0098"))d="0"+d.slice(4);else if(d.startsWith("98")&&d.length===12)d="0"+d.slice(2);else if(d.length===10&&d[0]==="9")d="0"+d;
+  return d;
+}
 const tokenVal=()=>norm($("key").value).replace(/[^\x21-\x7E]/g,"");
 
 // ===== قالب‌ها: [کد، عنوان، متن، ویژه] — هر {NAME} یک کادر قابل ویرایش است =====
@@ -267,7 +281,7 @@ const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم
 // ===== پیام شناور =====
 let tt;
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),3500);}
-function msg(t,c){const o=$("out");o.textContent=t;o.className="msg "+c;o.style.display="block";}
+function msg(t,c){const o=$("out");if(c==="err"){o.style.display="none";errToast(t);return;}o.textContent=t;o.className="msg "+c;o.style.display="block";}
 
 // ===== رمز شخصی (پشت علامت آچار) =====
 try{localStorage.removeItem("sms_key")}catch(e){}
@@ -368,19 +382,20 @@ if(window.visualViewport){window.visualViewport.addEventListener("resize",liftBa
 $("mobile").addEventListener("focus",()=>{setTimeout(liftBar,100);setTimeout(liftBar,350);});
 $("mobile").addEventListener("blur",()=>setTimeout(liftBar,100));
 
-function glassAlert(title,text){
-  const old=document.querySelector(".gl-wrap");if(old)old.remove();
-  const w=document.createElement("div");w.className="gl-wrap";
-  const g=document.createElement("div");g.className="gl";
-  const i=document.createElement("div");i.className="gl-i";i.textContent="⚠️";
-  const h=document.createElement("b");h.textContent=title;
-  const p=document.createElement("p");p.textContent=text;
-  const b=document.createElement("button");b.textContent="باشه";
-  b.onclick=()=>{w.classList.add("out");setTimeout(()=>w.remove(),220);};
-  w.onclick=e=>{if(e.target===w)b.onclick();};
-  g.appendChild(i);g.appendChild(h);g.appendChild(p);g.appendChild(b);w.appendChild(g);document.body.appendChild(w);
-  try{navigator.vibrate&&navigator.vibrate([20,40,20])}catch(e){}
+let snT;
+function errToast(t){ // پیام خطای کوچک پایین صفحه، بالای نوار ارسال
+  let e=$("snack");
+  if(!e){e=document.createElement("div");e.id="snack";e.className="snack";
+    const m=document.createElement("span");m.id="snackMsg";const x=document.createElement("b");x.textContent="✕";x.onclick=()=>e.classList.remove("show");
+    e.appendChild(m);e.appendChild(x);document.body.appendChild(e);}
+  $("snackMsg").textContent=String(t||"").replace(/^❌\s*(خطا:\s*)?/,"");
+  const bar=document.querySelector(".bar");
+  e.style.bottom=((bar&&parseFloat(bar.style.bottom))||0)+86+"px";
+  e.classList.remove("show");void e.offsetWidth;e.classList.add("show");
+  clearTimeout(snT);snT=setTimeout(()=>e.classList.remove("show"),Math.min(9000,3500+String(t).length*45));
+  try{navigator.vibrate&&navigator.vibrate(25)}catch(z){}
 }
+function glassAlert(title,text){errToast(text||title);} // همه‌ی خطاها حالا پیام کوچک پایین‌اند
 let pend=null;
 const NUMCODE=new Set(["955721","210603"]);
 function burst(){const r=$("send").getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,cols=["#ffd98a","#3dd9c0","#6d8bff","#ffffff","#f0a93a"];
@@ -391,7 +406,7 @@ function burst(){const r=$("send").getBoundingClientRect(),x=r.left+r.width/2,y=
 
 // ===== ارسال =====
 $("send").onclick=async()=>{
-  const key=tokenVal(),t=T[sel],mobile=norm($("mobile").value);
+  const key=tokenVal(),t=T[sel],mobile=cleanMobile($("mobile").value);
   if(WORKER.includes("YOUR-WORKER"))return msg("آدرس Worker هنوز داخل فایل تنظیم نشده","err");
   if(!key){$("keyBox").classList.remove("hide");return msg("رمز شخصی را از علامت 🔧 بالای صفحه وارد کن","err");}
   if(!/^09\d{9}$/.test(mobile)){shake($("mobile"));return msg("شماره موبایل معتبر نیست","err");}
@@ -433,7 +448,7 @@ $("send").onclick=async()=>{
     if(r.ok&&d.status===1){pend=null;
       $("out").style.display="none";toast("✅ پیامک ارسال شد");burst();if(d._remaining!=null)showQuota({remaining:d._remaining});
       const h=loadH();h.unshift({id:d.data&&d.data.messageId,mobile,name:np.value,tpl:t.title,code:t.code,vals:saved,t:Date.now(),s:null});
-      saveH(h);if(!$("hist").classList.contains("hide"))renderH();
+      saveH(h);fillRecent();if(!$("hist").classList.contains("hide"))renderH();
       $("mobile").value="";
       try{box.animate([{transform:"none",opacity:1},{transform:"translateY(-70px) scale(.94)",opacity:0}],{duration:420,easing:"cubic-bezier(.5,0,.8,.4)"}).finished.then(renderText,renderText);}catch(e){renderText();}
     }else{msg("❌ خطا: "+(d.message||r.status),"err");
@@ -461,7 +476,8 @@ function renderH(){
   const rb=document.createElement("button");rb.textContent="🔄 بروزرسانی";rb.onclick=refreshH;
   const cb=document.createElement("button");cb.textContent="🗑 پاک کردن";
   cb.onclick=()=>{if(confirm("تاریخچه ارسال‌ها پاک شود؟")){saveH([]);renderH();toast("تاریخچه پاک شد");}};
-  const grp=document.createElement("div");grp.style.cssText="display:flex;gap:6px";grp.appendChild(rb);grp.appendChild(cb);hh.appendChild(grp);
+  const grp=document.createElement("div");grp.style.cssText="display:flex;gap:6px";const xb=document.createElement("button");xb.textContent="⬇️ خروجی";xb.onclick=exportCSV;
+  grp.appendChild(rb);grp.appendChild(xb);grp.appendChild(cb);hh.appendChild(grp);
   b.appendChild(hh);
   if(!h.length){const e=document.createElement("div");e.className="hint";e.textContent="هنوز پیامکی ارسال نشده";b.appendChild(e);return;}
   h.forEach((x,k)=>{
@@ -483,6 +499,14 @@ function resend(x){
   $("hist").classList.add("hide");$("mobile").value="";window.scrollTo({top:0});
   toast("🔁 آماده ارسال؛ شماره را بنویس");$("mobile").focus();
 }
+function exportCSV(){
+  const h=loadH();if(!h.length)return toast("تاریخچه خالی است");
+  const q=v=>{v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};
+  const rows=[["نام","شماره","قالب","زمان","وضعیت"].map(q).join(",")].concat(h.map(x=>[x.name,x.mobile,x.tpl,new Date(x.t).toLocaleString("fa-IR"),info(x.s)[0].replace(/^\S+\s/,"")].map(q).join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"}));
+  a.download="sms-history.csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  toast("⬇️ فایل ذخیره شد");
+}
 async function refreshH(){
   const key=tokenVal();if(!key)return toast("اول رمز شخصی را از 🔧 وارد کن");
   const h=loadH();
@@ -500,6 +524,13 @@ $("histBtn").onclick=()=>{
   const b=$("hist");b.classList.toggle("hide");
   if(!b.classList.contains("hide")){b.classList.add("anim");setTimeout(()=>b.classList.remove("anim"),1200);renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
 };
+function fillRecent(){
+  const seen=[],dl=$("recentNums");dl.innerHTML="";
+  for(const x of loadH()){if(x.mobile&&!seen.includes(x.mobile)){seen.push(x.mobile);const o=document.createElement("option");o.value=x.mobile;dl.appendChild(o);if(seen.length>=8)break;}}
+}
+fillRecent();
+$("mobile").addEventListener("blur",()=>{const c=cleanMobile($("mobile").value);if(c)$("mobile").value=c;});
+$("mobile").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("mobile").blur();$("send").click();}});
 loadMe();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
