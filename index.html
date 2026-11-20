@@ -194,13 +194,19 @@ html[data-theme=light] body{background:radial-gradient(70% 40% at 100% 0%,#fbf5e
 .snack{position:fixed;left:50%;bottom:86px;transform:translate(-50%,26px);max-width:min(92vw,430px);display:flex;gap:10px;align-items:center;padding:11px 16px;border-radius:16px;font-size:13.5px;line-height:1.7;color:#7a1f1f;background:rgba(255,238,238,.86);border:1px solid rgba(214,80,80,.38);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 26px rgba(120,40,40,.22);opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.2,1.3,.4,1),opacity .25s;z-index:150}
 .snack.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .snack b{cursor:pointer;opacity:.55;font-weight:400}
+.notebtn{background:rgba(255,255,255,.16);border:0;border-radius:12px;padding:3px 8px;font-size:13px;margin-inline-end:6px;position:relative;cursor:pointer;color:#fff}
+.notebtn.dot::after{content:"";position:absolute;top:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:#ff6b6b;animation:dotp 1.6s infinite}
+@keyframes dotp{0%{box-shadow:0 0 0 0 #ff6b6bcc}70%,100%{box-shadow:0 0 0 8px #ff6b6b00}}
+.notebar{background:linear-gradient(145deg,#fff8e1,#ffefb8);border:1px solid #e8c766;color:#4a3800;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:14px;line-height:1.9;box-shadow:0 6px 16px #c8962c26}
+.notebar button{display:block;margin:8px 0 0 auto;padding:5px 16px;border:0;border-radius:10px;background:#d49a00;color:#fff;font-size:13px}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 <div class="app">
-  <header class="top"><h1>ارسال پیامک</h1><span class="quota hide" id="quota"></span><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
+  <header class="top"><h1>ارسال پیامک</h1><span class="quota hide" id="quota"></span><button class="notebtn hide" id="noteBtn" title="پیام مدیر">📢</button><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
   <main>
+    <div class="notebar hide" id="noteBar"></div>
     <div class="keybox hide" id="keyBox">
       <input id="key" type="password" dir="ltr" placeholder="رمز شخصی">
       <button id="saveKey">ذخیره</button>
@@ -291,9 +297,19 @@ const sk=()=>ls.s("sms_token",tokenVal());
 window.addEventListener("pagehide",sk);
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
 $("wrench").onclick=()=>$("keyBox").classList.toggle("hide");
-$("saveKey").onclick=()=>{if(!tokenVal())return toast("رمز شخصی را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");loadMe();};
+$("saveKey").onclick=()=>{if(!tokenVal())return toast("رمز شخصی را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");loadMe();loadTpls();};
 
 // ===== انتخاب قالب =====
+const BASE=T.map(x=>({...x}));
+// قالب‌هایی که مدیر از پنل ساخته؛ اگر کدشان با قالب داخلی یکی باشد، جایش را می‌گیرد (برای اصلاح متن غلط)
+function applyServerTpls(list){
+  T.length=0;BASE.forEach(x=>T.push({...x}));
+  (list||[]).forEach(x=>{
+    const o={code:String(x.code),title:x.title,text:x.text,fav:!!x.fav,swap:!!x.swap,mode:x.mode,srv:1},i=T.findIndex(t=>t.code===o.code);
+    if(i>=0)T[i]=o;else T.push(o);
+  });
+}
+try{applyServerTpls(JSON.parse(ls.g("sms_tpls_srv","[]")));}catch(e){}
 let sel=Math.max(0,T.findIndex(t=>t.code===ls.g("sms_selc","")));
 function moreLabel(){const m=$("chipsMore");$("moreBtn").textContent=m.classList.contains("open")?"کمتر ▴":"بیشتر ("+T.filter(t=>!t.fav).length+") ▾";}
 let intro=true;
@@ -359,6 +375,27 @@ function showQuota(d){
   if(!d||d.remaining==null){q.className="quota hide";return;}
   q.textContent="اعتبار شما "+Number(d.remaining).toLocaleString("fa-IR")+" عدد";q.className="quota"+(d.remaining<=0?" zero":d.remaining<=2?" low":"");
 }
+function showNote(n){
+  const b=$("noteBtn"),bar=$("noteBar");n=n||"";
+  if(!n){b.classList.add("hide");bar.classList.add("hide");return;}
+  const seen=ls.g("sms_note_seen","")===n;
+  b.classList.remove("hide");b.classList.toggle("dot",!seen);
+  bar.textContent="";const t=document.createElement("div");t.textContent="📢 پیام مدیر: "+n;bar.appendChild(t);
+  const ok=document.createElement("button");ok.textContent="باشه";ok.onclick=()=>{ls.s("sms_note_seen",n);b.classList.remove("dot");bar.classList.add("hide");};bar.appendChild(ok);
+  bar.classList.toggle("hide",seen);
+}
+$("noteBtn").onclick=()=>$("noteBar").classList.toggle("hide");
+async function loadTpls(){
+  const key=tokenVal();if(!key||WORKER.includes("YOUR-WORKER"))return;
+  try{
+    const r=await fetch(WORKER+"/templates",{headers:{"x-app-token":key},signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(12000):undefined});
+    if(!r.ok)return;const d=await r.json();
+    const cur=T[sel]&&T[sel].code,oldText=T[sel]&&T[sel].text;
+    ls.s("sms_tpls_srv",JSON.stringify(d.templates||[]));applyServerTpls(d.templates||[]);
+    sel=Math.max(0,T.findIndex(t=>t.code===cur));renderChips();
+    if(T[sel]&&T[sel].text!==oldText)renderText();
+  }catch(e){}
+}
 async function loadMe(){
   const key=tokenVal();if(!key||WORKER.includes("YOUR-WORKER"))return;
   const q=$("quota");
@@ -368,7 +405,7 @@ async function loadMe(){
       const d=await r.json().catch(()=>null);
       if(r.status===401){q.textContent="🔑 رمز اشتباه است";q.className="quota zero";return;}
       if(r.status===403&&d&&d.message){q.textContent="⛔ مسدود";q.className="quota zero";msg(d.message,"err");return;}
-      showQuota(r.ok?d:null);return;
+      showQuota(r.ok?d:null);if(r.ok&&d)showNote(d.admin?"":d.note);return;
     }catch(e){await new Promise(z=>setTimeout(z,1200));}
   }
   q.textContent="⚠️ اعتبار نامشخص؛ لمس کن";q.className="quota low"; // ارتباط برقرار نشد
@@ -413,7 +450,7 @@ $("send").onclick=async()=>{
   const spans=[...box.querySelectorAll(".f")];
   const empty=spans.filter(x=>!x.value.trim());
   if(empty.length){empty.forEach(x=>{x.classList.add("bad");shake(x);});return msg("بخش‌های قرمز را پر کن","err");}
-  if(NUMCODE.has(t.code)){const c=spans.find(x=>x.dataset.n==="CODE");
+  if(t.mode?t.mode==="num":NUMCODE.has(t.code)){const c=spans.find(x=>x.dataset.n==="CODE");
     if(c&&!/^\d+$/.test(norm(c.value))){c.classList.add("bad");shake(c);return glassAlert("فقط عدد بنویسید","در کادر «شماره» فقط عدد بنویسید؛ حروف و متن مجاز نیست.");}}
   const parameters=spans.map(s=>({name:s.dataset.n,value:s.value.trim()}));
   const np=parameters.find(p=>p.name==="NAME")||parameters[0]||{value:""};
@@ -423,7 +460,7 @@ $("send").onclick=async()=>{
   const dup=loadH().find(x=>x.code===t.code&&x.mobile===mobile&&Date.now()-x.t<60000);
   if(dup&&!confirm("همین قالب تا یک دقیقه پیش به همین شماره ارسال شده. دوباره ارسال شود؟"))return;
   // در قالب‌های sms.ir جنسیت بعد از نام می‌آید؛ برای نمایش «آقای نام» مقدارها جابه‌جا فرستاده می‌شوند
-  if(parameters.some(p=>p.name==="GENDER")&&parameters.some(p=>p.name==="NAME"))
+  if(t.swap!==false&&parameters.some(p=>p.name==="GENDER")&&parameters.some(p=>p.name==="NAME"))
     parameters.forEach(p=>{if(p.name==="GENDER")p.name="NAME";else if(p.name==="NAME")p.name="GENDER";});
   $("send").disabled=true;$("send").classList.add("busy");msg("در حال ارسال...","ok");
   // هر ارسال یک شناسه یکتا دارد؛ اگر اتصال قطع شد و دوباره امتحان شود، پیامک دوبار نمی‌رود
@@ -531,7 +568,7 @@ function fillRecent(){
 fillRecent();
 $("mobile").addEventListener("blur",()=>{const c=cleanMobile($("mobile").value);if(c)$("mobile").value=c;});
 $("mobile").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("mobile").blur();$("send").click();}});
-loadMe();
+loadMe();loadTpls();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
