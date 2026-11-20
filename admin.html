@@ -48,6 +48,15 @@ button:active{transform:scale(.94)}button:disabled{opacity:.35}
 .toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-90px);background:#12b5c9;color:#06121f;padding:10px 20px;border-radius:12px;font-weight:600;transition:transform .45s cubic-bezier(.2,1.4,.4,1);z-index:9;max-width:90vw;text-align:center}
 .toast.show{transform:translate(-50%,0)}.toast.err{background:#ff9f9f}
 .hide{display:none}
+textarea,select{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#e9eefb;font:inherit;margin-bottom:8px}
+select option{color:#111}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px;margin:2px 0 10px}.chk input{width:auto;margin:0}
+.hint{color:#8e9bb8;line-height:1.8;display:block}
+.tprev{background:linear-gradient(145deg,#3a5bff,#12b5c9);color:#fff;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.9;margin-bottom:10px;white-space:pre-wrap}
+.vrow{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12.5px}.vrow code{flex:0 0 96px;direction:ltr;color:#ffd98a}.vrow input{margin:0;padding:7px 9px}
+.trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.trow:last-child{border:0}.trow b{font-size:14px}.trow small{color:#8e9bb8}
+.note{color:#ffd98a}
 </style>
 </head>
 <body>
@@ -81,6 +90,19 @@ button:active{transform:scale(.94)}button:disabled{opacity:.35}
       <div id="units" class="btns"></div>
     </div>
 
+    <div class="card" id="tplCard">
+      <h3>📝 قالب‌ها (بدون دست‌زدن به کد)</h3>
+      <small class="hint">متن را <b>دقیقاً همان‌طور که در پنل sms.ir است</b> (با #NAME# و …) کپی کن. جابه‌جایی «آقای/خانم» و نام را خودش درست می‌کند.</small>
+      <input id="tCode" inputmode="numeric" placeholder="کد قالب (مثلاً 123456)" style="margin-top:8px">
+      <input id="tTitle" placeholder="عنوان دکمه (مثلاً هویتی)">
+      <textarea id="tRaw" rows="5" placeholder="متن قالب از پنل sms.ir"></textarea>
+      <select id="tMode"><option value="id">کادر CODE: عدد یا حرف انگلیسی (پیش‌فرض)</option><option value="num">کادر CODE: فقط عدد</option><option value="text">کادر CODE: متن (حروف فارسی)</option></select>
+      <label class="chk"><input type="checkbox" id="tFav"> قالب ویژه (بالای صفحه)</label>
+      <div id="tVars"></div>
+      <div class="tprev hide" id="tPrev"></div>
+      <button class="pri" id="tSave">ذخیره قالب</button>
+      <div id="tpls" style="margin-top:12px"></div>
+    </div>
     <div class="card"><h3 id="logT">آخرین ارسال‌ها</h3><div id="logs"></div></div>
     <div class="card"><h3>⚠️ تخلف‌ها (متن نامناسب)</h3><div id="viol"></div></div>
   </div>
@@ -119,7 +141,7 @@ async function load(){
     o={users:u.users,logs:l.logs,violations:v.violations||[]};
   }
   users=o.users||[];
-  renderSum();renderUsers();renderLogs(o.logs||[]);renderViol(o.violations||[]);renderUnits(o.units||[]);
+  renderSum();renderUsers();renderLogs(o.logs||[]);renderViol(o.violations||[]);renderUnits(o.units||[]);renderTpls(o.templates||[]);
 }
 function renderSum(){
   const act=users.filter(u=>u.active),low=act.filter(u=>u.quota-u.used<=2).length,today=users.reduce((s,u)=>s+(u.today||0),0);
@@ -147,6 +169,7 @@ function renderUsers(){
     const bar=el("div","bar"),i=el("i",cls);i.style.width=pct+"%";bar.appendChild(i);c.appendChild(bar);
     c.appendChild(el("small",null,"ارسال موفق: "+fa(u.sent)+" • امروز: "+fa(u.today)+" • ساخته‌شده: "+dt(u.created)));
     c.appendChild(el("small",null,"آخرین ارسال: "+dt(u.last)+(u.strikes?" • تخلف: "+fa(u.strikes):"")+(blk?" • مسدود تا "+dt(u.blocked_until):"")));
+    if(u.note)c.appendChild(el("small","note","📢 "+u.note));
     const B=el("div","btns");
     const btn=(t,f,k,dis)=>{const b=el("button",k||"",t);b.onclick=f;if(dis)b.disabled=true;B.appendChild(b);};
     const act=async(body,msg)=>{try{await api("/admin/user/"+u.id,"POST",body);toast(msg);load();}catch(e){toast(e.message,1);}};
@@ -159,6 +182,7 @@ function renderUsers(){
     if(u.strikes>0||blk||!u.active)btn("رفع مسدودی",()=>act({unblock:true},"مسدودی برداشته شد"));
     btn(u.active?"غیرفعال":"فعال",()=>act({active:!u.active},u.active?"غیرفعال شد":"فعال شد"));
     btn("تغییر رمز",()=>{const t=prompt("رمز جدید (حداقل ۴ حرف):");if(t)act({token:t},"رمز عوض شد");});
+    btn("📢 پیام",()=>{const t=prompt("پیامی که «"+u.name+"» کنار اعتبارش در سایت می‌بیند (خالی = پاک کردن):",u.note||"");if(t!==null)act({note:t},t.trim()?"پیام ثبت شد":"پیام پاک شد");});
     btn("ارسال‌ها",()=>{filter=u.id;load();$("logT").scrollIntoView({behavior:"smooth"});});
     btn("حذف",()=>{if(confirm("کاربر «"+u.name+"» حذف شود؟"))api("/admin/user/"+u.id,"DELETE").then(()=>{toast("حذف شد");load();});},"red");
     c.appendChild(B);box.appendChild(c);
@@ -209,6 +233,34 @@ function renderViol(list){
     d.appendChild(el("span","nok",dt(x.ts)));box.appendChild(d);
   });
 }
+// ---------- قالب‌ها ----------
+const DEFLBL={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",UNI:"واحد",CODE:"کد",TIME:"مدت (روز)"};
+function varsOf(raw){return [...new Set([...String(raw).matchAll(/#([A-Za-z][A-Za-z0-9_]{0,19})#/g)].map(m=>m[1]))];}
+function curLabels(){const o={};document.querySelectorAll("#tVars input").forEach(i=>{if(i.value.trim())o[i.dataset.v]=i.value.trim();});return o;}
+function refreshTpl(keep){
+  const raw=$("tRaw").value,vs=varsOf(raw),box=$("tVars"),old=keep||curLabels();box.innerHTML="";
+  vs.forEach(v=>{const r=el("div","vrow");r.appendChild(el("code",null,v));const i=document.createElement("input");i.dataset.v=v;i.placeholder="برچسب کادر (اختیاری، پیش‌فرض: "+(DEFLBL[v]||v)+")";i.value=old[v]||"";i.oninput=refreshPrev;r.appendChild(i);box.appendChild(r);});
+  refreshPrev();
+}
+function refreshPrev(){
+  const raw=$("tRaw").value.trim(),p=$("tPrev");if(!raw){p.classList.add("hide");return;}
+  const L=curLabels();let t=raw.replace(/#([A-Za-z][A-Za-z0-9_]{0,19})#/g,(m,v)=>"["+(L[v]||DEFLBL[v]||v)+"]");
+  p.textContent=t;p.classList.remove("hide");
+}
+function renderTpls(list){
+  const box=$("tpls");box.innerHTML="";
+  if(!list.length){box.appendChild(el("small","hint","هنوز قالبی از اینجا نساخته‌ای. قالب‌های قبلی داخل خود سایت هستند و از اینجا عوض نمی‌شوند، مگر این‌که همان کد را اینجا دوباره ذخیره کنی."));return;}
+  list.forEach(t=>{
+    const r=el("div","trow"),l=el("div");l.appendChild(el("b",null,t.title));l.appendChild(el("br"));l.appendChild(el("small",null,"کد "+t.code+(t.fav?" • ویژه":"")+" • CODE: "+({id:"عدد/حرف",num:"فقط عدد",text:"متن"}[t.mode]||t.mode)));
+    const g=el("div","btns");
+    const b=(txt,f,cls)=>{const x=el("button",cls||null,txt);x.onclick=f;g.appendChild(x);};
+    b(t.fav?"★":"☆",async()=>{try{await api("/admin/template/"+t.code,"POST",{fav:!t.fav});load();}catch(e){toast(e.message,1);}});
+    b("ویرایش",()=>{$("tCode").value=t.code;$("tTitle").value=t.title;$("tRaw").value=t.raw;$("tMode").value=t.mode;$("tFav").checked=!!t.fav;
+      const L={};String(t.text).replace(/\{(\w+)\|([^}]*)\}/g,(m,v,l)=>{L[v]=l;});refreshTpl(L);$("tplCard").scrollIntoView({behavior:"smooth"});});
+    b("حذف",()=>{if(confirm("قالب «"+t.title+"» حذف شود؟"))api("/admin/template/"+t.code,"DELETE").then(()=>{toast("حذف شد");load();}).catch(e=>toast(e.message,1));},"red");
+    r.appendChild(l);r.appendChild(g);box.appendChild(r);
+  });
+}
 async function enter(){
   tok=$("adm").value.replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[^\x21-\x7E]/g,"")||tok;if(!tok)return;
   try{await load();sessionStorage.setItem("adm",tok);$("login").classList.add("hide");$("panel").classList.remove("hide");spin($("logs"));}
@@ -224,6 +276,12 @@ $("add").onclick=async()=>{
 };
 $("wAdd").onclick=async()=>{
   try{await api("/admin/unit","POST",{word:$("wIn").value});toast("اضافه شد");$("wIn").value="";load();}
+  catch(e){toast(e.message,1);}
+};
+$("tRaw").oninput=()=>refreshTpl();
+$("tSave").onclick=async()=>{
+  try{const d=await api("/admin/template","POST",{code:$("tCode").value,title:$("tTitle").value,raw:$("tRaw").value,mode:$("tMode").value,fav:$("tFav").checked,labels:curLabels()});
+    toast("قالب ذخیره شد");$("tCode").value="";$("tTitle").value="";$("tRaw").value="";$("tFav").checked=false;$("tMode").value="id";refreshTpl();load();}
   catch(e){toast(e.message,1);}
 };
 if(tok){$("adm").value=tok;enter();}
