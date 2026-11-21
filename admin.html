@@ -57,6 +57,7 @@ select option{color:#111}
 .trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
 .trow:last-child{border:0}.trow b{font-size:14px}.trow small{color:#8e9bb8}
 .note{color:#ffd98a}
+.warn{background:#ffd98a22;color:#ffd98a;border:1px solid #ffd98a55;border-radius:12px;padding:8px 10px;font-size:12.5px;line-height:1.8;margin:8px 0}
 </style>
 </head>
 <body>
@@ -98,6 +99,7 @@ select option{color:#111}
       <textarea id="tRaw" rows="5" placeholder="متن قالب از پنل sms.ir"></textarea>
       <select id="tMode"><option value="id">کادر CODE: عدد یا حرف انگلیسی (پیش‌فرض)</option><option value="num">کادر CODE: فقط عدد</option><option value="text">کادر CODE: متن (حروف فارسی)</option></select>
       <label class="chk"><input type="checkbox" id="tFav"> قالب ویژه (بالای صفحه)</label>
+      <div class="warn hide" id="tplWarn">⚠️ Worker شما هنوز نسخه‌ی قدیمی است و ثبت قالب کار نمی‌کند. فایل <b>worker.js</b> جدید را در Cloudflare جایگزین و Deploy کن، بعد این صفحه را دوباره باز کن.</div>
       <div id="tVars"></div>
       <div class="tprev hide" id="tPrev"></div>
       <button class="pri" id="tSave">ذخیره قالب</button>
@@ -141,7 +143,7 @@ async function load(){
     o={users:u.users,logs:l.logs,violations:v.violations||[]};
   }
   users=o.users||[];
-  renderSum();renderUsers();renderLogs(o.logs||[]);renderViol(o.violations||[]);renderUnits(o.units||[]);renderTpls(o.templates||[]);
+  renderSum();renderUsers();renderLogs(o.logs||[]);renderViol(o.violations||[]);renderUnits(o.units||[]);renderTpls(o.templates||[]);$("tplWarn").classList.toggle("hide",Array.isArray(o.templates));
 }
 function renderSum(){
   const act=users.filter(u=>u.active),low=act.filter(u=>u.quota-u.used<=2).length,today=users.reduce((s,u)=>s+(u.today||0),0);
@@ -244,7 +246,7 @@ function refreshTpl(keep){
 }
 function refreshPrev(){
   const raw=$("tRaw").value.trim(),p=$("tPrev");if(!raw){p.classList.add("hide");return;}
-  const L=curLabels();let t=raw.replace(/#([A-Za-z][A-Za-z0-9_]{0,19})#/g,(m,v)=>"["+(L[v]||DEFLBL[v]||v)+"]");
+  const L=curLabels();let t=raw.replace(/#NAME#(\s+)#GENDER#/,"#GENDER#$1#NAME#").replace(/#([A-Za-z][A-Za-z0-9_]{0,19})#/g,(m,v)=>"["+(L[v]||DEFLBL[v]||v)+"]");
   p.textContent=t;p.classList.remove("hide");
 }
 function renderTpls(list){
@@ -282,7 +284,7 @@ $("tRaw").oninput=()=>refreshTpl();
 $("tSave").onclick=async()=>{
   try{const d=await api("/admin/template","POST",{code:$("tCode").value,title:$("tTitle").value,raw:$("tRaw").value,mode:$("tMode").value,fav:$("tFav").checked,labels:curLabels()});
     toast("قالب ذخیره شد");$("tCode").value="";$("tTitle").value="";$("tRaw").value="";$("tFav").checked=false;$("tMode").value="id";refreshTpl();load();}
-  catch(e){toast(e.message,1);}
+  catch(e){if(e.status===404){$("tplWarn").classList.remove("hide");toast("Worker هنوز به‌روز نیست؛ worker.js جدید را Deploy کن",1);}else toast(e.message,1);}
 };
 if(tok){$("adm").value=tok;enter();}
 </script>
