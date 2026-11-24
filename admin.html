@@ -1,292 +1,581 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="dark">
+<html lang="fa" dir="rtl" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>مدیریت پیامک</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<meta name="theme-color" content="#142253">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ارسال پیامک</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
+:root{--ink:#123047;--teal:#0f766e;--mist:#e9eef2;--line:#cfd9e0;--amber:#ffe08a;--amber-d:#d49a00}
 *{box-sizing:border-box}
-body{margin:0;font-family:Vazirmatn,Tahoma,sans-serif;color:#e9eefb;background:radial-gradient(60% 40% at 92% -5%,#3a4fe05a,transparent 70%),radial-gradient(50% 35% at 0% 36%,#12b8a238,transparent 70%),#080d1c;background-attachment:fixed;min-height:100vh}
-.app{max-width:520px;margin:0 auto;padding:0 16px 40px}
-header{padding:18px 4px;font-weight:800;font-size:17px}
-.card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:14px;margin-bottom:14px}
-h3{margin:0 0 10px;font-size:14px;color:#b8c4e0}
-input{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#e9eefb;font:inherit;margin-bottom:8px}
-button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 12px;background:rgba(255,255,255,.12);color:#e9eefb;transition:transform .15s}
-button:active{transform:scale(.94)}button:disabled{opacity:.35}
-.pri{background:linear-gradient(135deg,#3a5bff,#12b5c9);color:#fff;font-weight:600;width:100%;padding:12px}
-.row{display:flex;gap:8px}.row>*{flex:1}
-.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.sum div{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:14px;padding:10px 6px;text-align:center}
-.sum b{display:block;font-size:19px;margin-bottom:2px}.sum span{font-size:11.5px;color:#9fb0d0}
-.u{display:flex;flex-direction:column;gap:7px}
-.utop{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.utop b{font-size:15px}
-.tok{font-size:12px;padding:5px 10px;background:rgba(255,217,138,.13);color:#ffd98a;direction:ltr;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.big{font-size:21px;font-weight:800;background:linear-gradient(135deg,#7ff0dc,#9bb0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.big.low{background:none;color:#ffd98a}.big.zero{background:none;color:#ff9f9f}
-.u small{color:#8e9bb8;line-height:1.7}
-.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,#3dd9c0,#6d8bff);transition:width .5s}
-.bar i.low{background:#ffd98a}.bar i.zero{background:#ff6b6b}
-.btns{display:flex;flex-wrap:wrap;gap:6px}.btns button{font-size:12.5px;padding:7px 10px}
-.btns .pm{font-size:17px;padding:2px 14px;font-weight:800}
-.off{opacity:.55}
-.red{background:#ff6b6b30;color:#ff9f9f}
-.chipx{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.09);border-radius:20px;padding:5px 6px 5px 12px;font-size:13px}
-.chipx button{padding:0 7px;font-size:15px;background:rgba(255,107,107,.25);color:#ff9f9f;border-radius:50%}
-.log{font-size:12.5px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px}
-.log:last-child{border:0}.okc{color:#7ff0dc}.nok{color:#ff9f9f}
-/* ===== چرخ ارسال‌ها (مثل لاستیک می‌چرخد) ===== */
-.wheel{position:relative;height:250px;overflow-y:auto;perspective:650px;scroll-snap-type:y proximity;overscroll-behavior:contain;scrollbar-width:none;
-  -webkit-mask-image:linear-gradient(transparent 0,#000 26%,#000 74%,transparent 100%);mask-image:linear-gradient(transparent 0,#000 26%,#000 74%,transparent 100%)}
-.wheel::-webkit-scrollbar{display:none}
-.wheel .pad{height:100px;flex:none}
-.wheel .log{scroll-snap-align:center;margin:7px 6px;padding:11px 12px;border:0;border-radius:12px;background:rgba(255,255,255,.07);flex-wrap:wrap;will-change:transform,opacity}
-.toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-90px);background:#12b5c9;color:#06121f;padding:10px 20px;border-radius:12px;font-weight:600;transition:transform .45s cubic-bezier(.2,1.4,.4,1);z-index:9;max-width:90vw;text-align:center}
-.toast.show{transform:translate(-50%,0)}.toast.err{background:#ff9f9f}
+body{margin:0;font-family:Vazirmatn,Tahoma,sans-serif;background:var(--mist);color:var(--ink)}
+.app{max-width:480px;margin:0 auto;min-height:100vh}
+.top{background:var(--ink);color:#fff;padding:12px 22px;min-height:52px;display:flex;justify-content:space-between;align-items:center;border-radius:0 0 22px 22px;box-shadow:0 6px 18px #12304722}
+.top h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.2px;opacity:.92}
+.wrench{background:none;border:0;color:#fff;opacity:.7;font-size:15px;padding:6px 8px;cursor:pointer}
+main{padding:16px 16px 110px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+button{font:inherit;cursor:pointer}
+button:disabled{opacity:.6}
+.keybox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+.keybox button{width:100%;margin-top:10px;padding:10px;border:0;border-radius:10px;background:var(--ink);color:#fff}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:9px 6px;padding-top:2px}
+.chip{position:relative;width:100%;height:34px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 3px;font-size:10.5px;line-height:1.2;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:9px}
+.chip.long{font-size:9px}
+.chip.fav{background:#fff;border-color:var(--amber-d);font-weight:600}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.badge{position:absolute;top:-7px;right:5px;background:var(--amber-d);color:#fff;font-size:8px;line-height:1;padding:2px 5px;border-radius:5px;font-weight:400}
+.phone{background:#d5dee5;border-radius:18px;padding:12px;margin-top:18px}
+.bubble{background:#fff;border-radius:16px 16px 16px 4px;padding:12px 14px;font-size:14px;line-height:1.85}
+.f{background:var(--amber);border:0;border-bottom:1.5px solid var(--amber-d);border-radius:4px;padding:0 4px;margin:0;height:auto;font:inherit;font-size:12.5px;line-height:1.3;color:var(--ink);text-align:center;outline:none;display:inline-block;vertical-align:baseline;min-width:26px;box-shadow:none}
+.f.meas{position:fixed;visibility:hidden;pointer-events:none;white-space:pre;left:0;top:0;width:auto}
+.f::placeholder{color:#8a6a00;opacity:.75}
+.f.bad{background:#fecaca;border-bottom-color:#dc2626}
+.f:focus{background:#ffd24d}
+.hint{font-size:11.5px;color:#5b7183;margin-top:8px}
+.msg{margin-top:14px;padding:10px 12px;border-radius:10px;font-size:14px;display:none}
+.ok{background:#d9f2ec;color:#0b5b53}.err{background:#fde2e2;color:#9b1c1c}
 .hide{display:none}
-textarea,select{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#e9eefb;font:inherit;margin-bottom:8px}
-select option{color:#111}
-.chk{display:flex;gap:8px;align-items:center;font-size:13px;margin:2px 0 10px}.chk input{width:auto;margin:0}
-.hint{color:#8e9bb8;line-height:1.8;display:block}
-.tprev{background:linear-gradient(145deg,#3a5bff,#12b5c9);color:#fff;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.9;margin-bottom:10px;white-space:pre-wrap}
-.vrow{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12.5px}.vrow code{flex:0 0 96px;direction:ltr;color:#ffd98a}.vrow input{margin:0;padding:7px 9px}
-.trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
-.trow:last-child{border:0}.trow b{font-size:14px}.trow small{color:#8e9bb8}
-.note{color:#ffd98a}
-.warn{background:#ffd98a22;color:#ffd98a;border:1px solid #ffd98a55;border-radius:12px;padding:8px 10px;font-size:12.5px;line-height:1.8;margin:8px 0}
+body.editing main{padding-bottom:70vh}
+body.editing .bar{display:none}
+body.editing .phone{position:sticky;top:8px;z-index:6;box-shadow:0 8px 22px #12304733}
+.tools{display:flex;gap:2px}
+#hist{margin-top:26px}
+.hh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-weight:600;font-size:14px}
+.hh button{width:auto;margin:0;padding:6px 12px;border:0;border-radius:8px;background:#d5dee5;color:var(--ink);font-size:13px}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
+.bar input{flex:1;max-width:310px;direction:ltr;text-align:right}
+#send{padding:0 24px;border:0;border-radius:10px;background:var(--teal);color:#fff;font-weight:600;font-size:16px}
+.toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-120px);background:var(--teal);color:#fff;padding:12px 22px;border-radius:12px;font-size:15px;transition:transform .35s;z-index:99}
+.toast.show{transform:translate(-50%,0)}
+.hi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px;line-height:1.9}
+.hi b{font-size:14px}
+.tag{display:inline-block;padding:1px 8px;border-radius:8px;font-size:12px}
+.tag.ok{background:#d9f2ec;color:#0b5b53}.tag.err{background:#fde2e2;color:#9b1c1c}
+.tag.op{background:#dbeafe;color:#1e40af}.tag.wait{background:#fff1c2;color:#7a5600}
+.raw{color:#94a3b8;font-size:11px}
+.morebtn{display:block;width:100%;margin-top:8px;padding:6px;border:0;border-top:1px dashed var(--line);background:none;color:#5b7183;font-size:12px}
+.more-box{overflow:hidden;max-height:0;padding-top:0;transition:max-height .3s ease,padding .3s ease}
+.more-box.open{max-height:320px;padding-top:10px}
+.re{width:auto;margin-top:6px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:12px}
+
+/* ===== انیمیشن‌ها ===== */
+@keyframes dropIn{from{transform:translateY(-110%);opacity:0}to{transform:none;opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes barIn{from{transform:translateY(110%)}to{transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.55) translateY(8px)}60%{opacity:1;transform:scale(1.07)}100%{opacity:1;transform:none}}
+@keyframes selPop{0%{transform:scale(.9)}50%{transform:scale(1.09)}100%{transform:scale(1)}}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(12px) scale(.97);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+@keyframes fieldIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes sheen{from{transform:translateX(-150%)}to{transform:translateX(330%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rip{to{transform:scale(2.8);opacity:0}}
+@keyframes tbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 #d49a0055}50%{box-shadow:0 0 0 5px #d49a0000}}
+@keyframes confetti{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+.top{position:relative;overflow:hidden;animation:dropIn .7s cubic-bezier(.2,.85,.25,1) both}
+.top::after{content:"";position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(100deg,transparent,#ffffff18,transparent);animation:sheen 6s ease-in-out 1.5s infinite;pointer-events:none}
+.wrench{transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .2s}
+.wrench:active{transform:rotate(28deg) scale(.85);opacity:1}
+.chip{overflow:hidden;transition:transform .18s,background .3s,color .3s,border-color .3s,box-shadow .3s}
+.chip:active{transform:scale(.93)}
+.chip.fav:not(.on){box-shadow:0 2px 8px #d49a0022}
+.chip.on{animation:selPop .38s cubic-bezier(.3,1.4,.5,1);box-shadow:0 4px 14px #12304744}
+.chip.enter{animation:popIn .5s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i)*38ms + 280ms)}
+.chip.pop{animation:popIn .42s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:var(--d,0ms)}
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);animation:rip .65s ease-out forwards;pointer-events:none}
+.morebtn{transition:color .2s,letter-spacing .3s}.morebtn:active{letter-spacing:1px;color:var(--ink)}
+.phone{animation:riseIn .65s .4s cubic-bezier(.2,.8,.2,1) both}
+.f{transition:width .22s cubic-bezier(.3,1.2,.5,1),background .25s,box-shadow .25s,border-color .25s}
+.f:focus{box-shadow:0 0 0 3px #d49a0050;border-bottom-color:#b07d00}
+.f.bad{box-shadow:0 0 0 3px #dc262633}
+.bar{animation:barIn .7s .55s cubic-bezier(.2,.85,.25,1) both}
+.bar input{transition:box-shadow .25s,border-color .25s}.bar input:focus{border-color:var(--teal);box-shadow:0 0 0 3px #0f766e30;outline:none}
+#send{position:relative;overflow:hidden;transition:transform .15s,box-shadow .25s;box-shadow:0 6px 16px #0f766e44}
+#send:active{transform:scale(.94)}
+#send.busy{color:transparent;pointer-events:none}
+#send.busy::after{content:"";position:absolute;inset:0;margin:auto;width:20px;height:20px;border:2.5px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .65s linear infinite}
+.keybox{animation:riseIn .4s cubic-bezier(.2,.8,.2,1) both}
+.toast{transition:transform .55s cubic-bezier(.2,1.4,.4,1);padding-bottom:16px;overflow:hidden}
+.toast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:#ffffff88;transform-origin:right;transform:scaleX(0)}
+.toast.show::after{animation:tbar 3.5s linear forwards}
+.msg{transition:opacity .3s}
+#hist.anim{animation:riseIn .5s cubic-bezier(.2,.8,.2,1)}
+#hist.anim .hi{animation:riseIn .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--k)*55ms + 100ms)}
+.tag.wait{animation:ring 1.8s ease-in-out infinite}
+.re,.hh button{transition:transform .15s}.re:active,.hh button:active{transform:scale(.92)}
+.cf{position:fixed;width:7px;height:11px;border-radius:2px;pointer-events:none;z-index:120;animation:confetti .95s cubic-bezier(.15,.7,.3,1) forwards}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ===== تم مدرن (روشن و تیره) ===== */
+:root{--g1:#3a5bff;--g2:#12b5c9;--grad:linear-gradient(135deg,var(--g1),var(--g2))}
+html{color-scheme:light}html[data-theme=dark]{color-scheme:dark}
+body{background:radial-gradient(70% 40% at 100% 0%,#c9d6ff90,transparent 70%),radial-gradient(60% 35% at 0% 28%,#bff3ea90,transparent 70%),#f3f6fc;background-attachment:fixed;color:#14203f}
+.top{background:linear-gradient(135deg,#142253,#2a4bb0)}
+.chip{background:#ffffffcc;border-color:#d5ddf0}
+.chip.fav:not(.on){border-color:#e8b24a;background:#fffaf0}
+.chip.on{background:var(--grad);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 6px 18px #3a5bff44}
+.phone{background:#ffffff8c;border:1px solid #ffffffcc;box-shadow:0 12px 32px #2a4bb01c}
+.bubble{background:var(--grad);color:#fff;border-radius:20px 20px 20px 5px;box-shadow:0 8px 20px #3a5bff33}
+.f{background:#ffe9a8;color:#3a2a00;border-bottom-color:#e0a21a}
+.f::placeholder{color:#8a6200;opacity:.75}
+.hint{color:#6b7a99}
+.bar{background:#ffffffe8;backdrop-filter:blur(14px)}
+#send{background:var(--grad);color:#fff;box-shadow:0 8px 20px #3a5bff44}
+.toast{background:var(--grad)}
+input{border-color:#d5ddf0}
+
+html[data-theme=dark] body{background:radial-gradient(60% 40% at 92% -5%,#3a4fe05a,transparent 70%),radial-gradient(50% 35% at 0% 36%,#12b8a238,transparent 70%),#080d1c;background-attachment:fixed;color:#e9eefb}
+[data-theme=dark] .top{background:rgba(255,255,255,.06);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.1);box-shadow:none}
+[data-theme=dark] .chip{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#e9eefb}
+[data-theme=dark] .chip.fav:not(.on){border-color:#ffd98a88;background:rgba(255,217,138,.07);box-shadow:0 0 14px #ffd98a22}
+[data-theme=dark] .chip.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 6px 20px #3a5bff66}
+[data-theme=dark] .phone{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);box-shadow:none}
+[data-theme=dark] .bubble{box-shadow:0 10px 28px #3a5bff40}
+[data-theme=dark] input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:#e9eefb}
+[data-theme=dark] input::placeholder{color:#7f8cab}
+[data-theme=dark] .f{color:#3a2a00}
+[data-theme=dark] .f.bad{background:#ff9a9a;color:#3a0000}
+[data-theme=dark] .f:focus{background:#ffd24d;box-shadow:0 0 0 3px #ffd98a55}
+[data-theme=dark] .bar{background:rgba(8,13,28,.8);border-top-color:rgba(255,255,255,.1)}
+[data-theme=dark] .bar input:focus{border-color:#3dd9c0;box-shadow:0 0 0 3px #3dd9c033}
+[data-theme=dark] #send{color:#fff;box-shadow:0 8px 24px #3a5bff66}
+[data-theme=dark] .keybox{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+[data-theme=dark] .keybox button{background:rgba(255,255,255,.14);color:#e9eefb}
+[data-theme=dark] .morebtn{color:#8e9bb8;border-top-color:rgba(255,255,255,.16)}
+[data-theme=dark] .morebtn:active{color:#fff}
+[data-theme=dark] .hint,[data-theme=dark] .raw{color:#8e9bb8}
+[data-theme=dark] .hi{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#e9eefb}
+[data-theme=dark] .re{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#e9eefb}
+[data-theme=dark] .hh{color:#e9eefb}
+[data-theme=dark] .hh button{background:rgba(255,255,255,.1);color:#e9eefb}
+[data-theme=dark] .tag.ok,[data-theme=dark] .ok{background:#3dd9c022;color:#7ff0dc}
+[data-theme=dark] .tag.err,[data-theme=dark] .err{background:#ff6b6b24;color:#ff9f9f}
+[data-theme=dark] .tag.op{background:#6d8bff24;color:#b2c1ff}
+[data-theme=dark] .tag.wait{background:#ffd98a22;color:#ffd98a}
+[data-theme=dark] input.f{background:#fff1b8;color:#2b2100;border:0;border-bottom:2px solid #f0b429;border-radius:5px}
+[data-theme=dark] input.f::placeholder{color:#8a6a14;opacity:.9}
+[data-theme=dark] input.f:focus{background:#ffe27a;box-shadow:0 0 0 3px #ffe27a66}
+[data-theme=dark] input.f.bad{background:#ffb8b8;color:#3a0000;border-bottom-color:#e5484d}
+.quota{margin-inline-start:auto;margin-inline-end:10px;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.13);font-size:11.5px;animation:popIn .4s both}
+.quota.low{background:#ffd98a33;color:#ffd98a}
+.quota.zero{background:#ff6b6b33;color:#ff9f9f}
+/* ===== زمینه استخوانی ===== */
+html[data-theme=light] body{background:radial-gradient(70% 40% at 100% 0%,#fbf5e6cc,transparent 70%),radial-gradient(60% 35% at 0% 30%,#e6dcc4aa,transparent 70%),#eee7d7;background-attachment:fixed;color:#2d2b26}
+[data-theme=light] .chip{background:#fbf8f0d9;border-color:#d8cdb4;color:#2d2b26}
+[data-theme=light] .chip.fav:not(.on){background:#fffaf0;border-color:#d9a640}
+[data-theme=light] .chip.on{background:var(--grad);border-color:transparent;color:#fff}
+[data-theme=light] .phone{background:#fbf8f08c;border-color:#fffbf0cc;box-shadow:0 12px 32px #6b5b3a1c}
+[data-theme=light] .bar{background:#f6f1e6ee}
+[data-theme=light] input{border-color:#d8cdb4}
+[data-theme=light] .hint,[data-theme=light] .morebtn{color:#7a705a}
+/* ===== اخطار شیشه‌ای ===== */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes wob{0%{transform:scale(.4) rotate(-20deg)}60%{transform:scale(1.2) rotate(8deg)}100%{transform:none}}
+.gl-wrap{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(40,32,15,.3);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);animation:fadeIn .25s both}
+.gl-wrap.out{opacity:0;transition:opacity .2s}
+.gl{width:min(88vw,340px);padding:24px 20px 18px;border-radius:26px;text-align:center;color:#1d2a4d;background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(255,255,255,.46));border:1px solid rgba(255,255,255,.8);box-shadow:0 24px 60px rgba(40,32,15,.3),inset 0 1px 0 rgba(255,255,255,.95);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);animation:popIn .5s cubic-bezier(.2,.9,.3,1.2) both}
+.gl-i{font-size:42px;animation:wob .6s .15s both}
+.gl b{display:block;font-size:16px;margin:6px 0 4px}
+.gl p{margin:0 0 16px;font-size:14px;line-height:1.9;color:#33405f}
+.gl button{width:100%;margin:0;padding:11px;border:0;border-radius:14px;background:var(--grad);color:#fff;font-weight:600;font-size:15px}
+/* ===== دکمه‌های قالب سه‌بعدی ===== */
+.chip.enter,.chip.pop{animation-fill-mode:backwards}
+[data-theme=light] .chip{background:linear-gradient(180deg,#fffdf8,#f0e8d6);border:1px solid #d3c7ab;border-bottom-color:#bcae8e;box-shadow:0 3px 0 #c7b996,0 9px 14px #6b5b3a26,inset 0 1px 0 #fff;transform:translateY(0);transition:transform .12s,box-shadow .12s,background .25s,color .25s}
+[data-theme=light] .chip:active{transform:translateY(3px);box-shadow:0 0 0 #c7b996,0 2px 5px #6b5b3a30,inset 0 1px 0 #fff}
+[data-theme=light] .chip.fav:not(.on){background:linear-gradient(180deg,#fffaf0,#f6e3b4);border-color:#d9a640;border-bottom-color:#c08a22;box-shadow:0 3px 0 #c8962c,0 9px 14px #c8962c33,inset 0 1px 0 #fff}
+[data-theme=light] .chip.on{background:linear-gradient(180deg,#6483ff,#3358f0 55%,#10a9c0);border-color:#2a43c4;border-bottom-color:#1f33a0;color:#fff;text-shadow:0 1px 1px #0005;box-shadow:0 3px 0 #1f33a0,0 11px 20px #3a5bff55,inset 0 1px 0 #ffffff88,inset 0 -2px 5px #0003}
+[data-theme=light] .chip.on:active{box-shadow:0 0 0 #1f33a0,0 3px 8px #3a5bff55,inset 0 1px 0 #ffffff88,inset 0 -2px 5px #0003}
+.chips{padding-bottom:4px}
+.snack{position:fixed;left:50%;bottom:86px;transform:translate(-50%,26px);max-width:min(92vw,430px);display:flex;gap:10px;align-items:center;padding:11px 16px;border-radius:16px;font-size:13.5px;line-height:1.7;color:#7a1f1f;background:rgba(255,238,238,.86);border:1px solid rgba(214,80,80,.38);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 26px rgba(120,40,40,.22);opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.2,1.3,.4,1),opacity .25s;z-index:150}
+.snack.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.snack b{cursor:pointer;opacity:.55;font-weight:400}
+.notebtn{background:rgba(255,255,255,.16);border:0;border-radius:12px;padding:3px 8px;font-size:13px;margin-inline-end:6px;position:relative;cursor:pointer;color:#fff}
+.notebtn.dot::after{content:"";position:absolute;top:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:#ff6b6b;animation:dotp 1.6s infinite}
+@keyframes dotp{0%{box-shadow:0 0 0 0 #ff6b6bcc}70%,100%{box-shadow:0 0 0 8px #ff6b6b00}}
+.notebar{background:linear-gradient(145deg,#fff8e1,#ffefb8);border:1px solid #e8c766;color:#4a3800;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:14px;line-height:1.9;box-shadow:0 6px 16px #c8962c26}
+.notebar button{display:block;margin:8px 0 0 auto;padding:5px 16px;border:0;border-radius:10px;background:#d49a00;color:#fff;font-size:13px}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 <div class="app">
-  <header>🛠 مدیریت پیامک</header>
-
-  <div class="card" id="login">
-    <h3>ورود مدیر</h3>
-    <input id="adm" type="password" placeholder="رمز مدیر (ADMIN_TOKEN)">
-    <button class="pri" id="go">ورود</button>
-  </div>
-
-  <div id="panel" class="hide">
-    <div class="sum" id="sum"></div>
-
-    <div class="card">
-      <h3>کاربر جدید</h3>
-      <input id="nName" placeholder="نام (مثلاً علی)">
-      <div class="row"><input id="nTok" placeholder="رمز شخصی (حداقل ۴ حرف)" dir="ltr"><button id="rnd" style="flex:0 0 auto;height:44px">🎲 تصادفی</button></div>
-      <input id="nQ" type="number" inputmode="numeric" placeholder="اعتبار اولیه (تعداد پیامک)" value="1">
-      <button class="pri" id="add">ساخت کاربر</button>
+  <header class="top"><h1>ارسال پیامک</h1><span class="quota hide" id="quota"></span><button class="notebtn hide" id="noteBtn" title="پیام مدیر">📢</button><div class="tools"><button class="wrench" id="histBtn" title="تاریخچه">🕘</button><button class="wrench" id="wrench" title="تنظیمات">🔧</button></div></header>
+  <main>
+    <div class="notebar hide" id="noteBar"></div>
+    <div class="keybox hide" id="keyBox">
+      <input id="key" type="password" dir="ltr" placeholder="رمز شخصی">
+      <button id="saveKey">ذخیره</button>
     </div>
-
-    <input id="uq" placeholder="🔎 جستجوی کاربر…">
-    <div id="users"></div>
-
-    <div class="card">
-      <h3>🏙 واحدهای مجاز اضافه (علاوه بر مرکز، مرکزی، تهران ..., شهرها)</h3>
-      <div class="row"><input id="wIn" placeholder="مثلاً تهران شرق"><button id="wAdd" style="flex:0 0 auto;height:44px">افزودن</button></div>
-      <div id="units" class="btns"></div>
-    </div>
-
-    <div class="card" id="tplCard">
-      <h3>📝 قالب‌ها (بدون دست‌زدن به کد)</h3>
-      <small class="hint">متن را <b>دقیقاً همان‌طور که در پنل sms.ir است</b> (با #NAME# و …) کپی کن. جابه‌جایی «آقای/خانم» و نام را خودش درست می‌کند.</small>
-      <input id="tCode" inputmode="numeric" placeholder="کد قالب (مثلاً 123456)" style="margin-top:8px">
-      <input id="tTitle" placeholder="عنوان دکمه (مثلاً هویتی)">
-      <textarea id="tRaw" rows="5" placeholder="متن قالب از پنل sms.ir"></textarea>
-      <select id="tMode"><option value="id">کادر CODE: عدد یا حرف انگلیسی (پیش‌فرض)</option><option value="num">کادر CODE: فقط عدد</option><option value="text">کادر CODE: متن (حروف فارسی)</option></select>
-      <label class="chk"><input type="checkbox" id="tFav"> قالب ویژه (بالای صفحه)</label>
-      <div class="warn hide" id="tplWarn">⚠️ Worker شما هنوز نسخه‌ی قدیمی است و ثبت قالب کار نمی‌کند. فایل <b>worker.js</b> جدید را در Cloudflare جایگزین و Deploy کن، بعد این صفحه را دوباره باز کن.</div>
-      <div id="tVars"></div>
-      <div class="tprev hide" id="tPrev"></div>
-      <button class="pri" id="tSave">ذخیره قالب</button>
-      <div id="tpls" style="margin-top:12px"></div>
-    </div>
-    <div class="card"><h3 id="logT">آخرین ارسال‌ها</h3><div id="logs"></div></div>
-    <div class="card"><h3>⚠️ تخلف‌ها (متن نامناسب)</h3><div id="viol"></div></div>
-  </div>
+    <div class="chips" id="chips"></div>
+    <button class="morebtn" id="moreBtn"></button>
+    <div class="chips more-box" id="chipsMore"></div>
+    <section class="phone">
+      <div class="bubble" id="sms"></div>
+      <div class="hint">روی بخش‌های زرد بزن و مقدار را بنویس</div>
+    </section>
+    <div class="msg" id="out"></div>
+    <div class="hide" id="hist"></div>
+  </main>
+  <footer class="bar">
+    <input id="mobile" inputmode="numeric" placeholder="09123456789" list="recentNums" autocomplete="off"><datalist id="recentNums"></datalist>
+    <button id="send">ارسال</button>
+  </footer>
 </div>
 
 <script>
+// ===== آدرس Worker کلودفلر خودت را اینجا بگذار =====
 const WORKER="https://hidden-cherry-875a.asnadir361.workers.dev";
+const API_URL=WORKER+"/send";
+const REPORT_URL=WORKER+"/report/";
 const $=id=>document.getElementById(id);
-const fa=n=>Number(n||0).toLocaleString("fa-IR");
-const dt=t=>t?new Date(t).toLocaleString("fa-IR"):"—";
-const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;};
-let tok=sessionStorage.getItem("adm")||"",filter=0,users=[],uq="";
-let tt;function toast(t,err){const e=$("toast");e.textContent=t;e.className="toast show"+(err?" err":"");clearTimeout(tt);tt=setTimeout(()=>e.className="toast"+(err?" err":""),2800);}
-
-async function api(path,method="GET",body){
-  let r;
-  for(let t=0;t<2;t++){ // یک بار تلاش دوباره اگر ارتباط قطع شد
-    try{
-      r=await fetch(WORKER+path,{method,headers:{"Content-Type":"application/json","x-app-token":tok},body:body?JSON.stringify(body):undefined,
-        signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(20000):undefined});
-      break;
-    }catch(e){await new Promise(z=>setTimeout(z,1200));}
-  }
-  if(!r)throw new Error("اتصال به سرور برقرار نشد؛ اینترنت را بررسی کن (آدرس Worker را در مرورگر باز کن، اگر باز نشد شبکه‌ات آن را بسته)");
-  const d=await r.json().catch(()=>({}));
-  if(!r.ok){const er=new Error(d.message||("خطا "+r.status));er.status=r.status;throw er;}
+const ls={g(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const MARK="@";
+function validNID(v){v=norm(v);if(!/^\d{10}$/.test(v)||/^(\d)\1{9}$/.test(v))return false;let n=0;for(let i=0;i<9;i++)n+=+v[i]*(10-i);const r=n%11,c=+v[9];return r<2?c===r:c===11-r;}
+const norm=v=>v.trim().replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632);
+function cleanMobile(v){ // +98 / 0098 / فاصله / خط تیره / ارقام فارسی → 09xxxxxxxxx
+  let d=norm(String(v)).replace(/\D/g,"");
+  if(d.startsWith("0098"))d="0"+d.slice(4);else if(d.startsWith("98")&&d.length===12)d="0"+d.slice(2);else if(d.length===10&&d[0]==="9")d="0"+d;
   return d;
 }
-async function load(){
-  const q=filter?"?user="+filter:"";
-  let o;
-  try{ o=await api("/admin/overview"+q); }
-  catch(e){
-    if(e.status!==404)throw e; // Worker قدیمی‌تر است: همان سه مسیر قبلی
-    const [u,l,v]=await Promise.all([api("/admin/users"),api("/admin/logs"+q),api("/admin/violations").catch(()=>({violations:[]}))]);
-    o={users:u.users,logs:l.logs,violations:v.violations||[]};
+const tokenVal=()=>norm($("key").value).replace(/[^\x21-\x7E]/g,"");
+
+// ===== قالب‌ها: [کد، عنوان، متن، ویژه] — هر {NAME} یک کادر قابل ویرایش است =====
+const P="متقاضی گرامی {GENDER} {NAME} با کد ملی {NATIONALID} ";
+const ALL=[
+ // ویژه‌ها (به ترتیب)
+ ["955721","گواهینامه ارجاع",P+"گواهینامه به شماره {CODE|شماره} با شناسه {ID} به واحد بررسی ارجاع داده شد.\nواحد {UNIT}",1],
+ ["747266","ارجاع دانشنامه",P+"دانشنامه {DEGREE} شما در رشته {FIELD} با شناسه {ID} به واحد تکمیلی جهت پرداخت شهریه ارجاع گردید.\nواحد {UNIT}",1],
+ ["318623","تاییدیه نهایی","متقاضی گرامی درخواست شما تایید شد.\nبروزرسانی سامانه حداکثر طی {TIME} روز کاری\nواحد {UNI}",1],
+ ["353394","بررسی معافیت متقاضی",P+"معافیت از خدمت / {DEGREE} شما با شناسه {ID} ثبت گردید.\nواحد {UNIT}",1],
+ ["210603","گواهینامه",P+"گواهینامه به شماره {CODE|شماره} با شناسه {ID} ثبت گردید.\nواحد {UNIT}",1],
+ ["187027","شهریه دانشجو","دانشجوی گرامی،\nبا توجه به بسته‌شدن پرتال آموزشی، خواهشمند است نسبت به تسویه بدهی شهریه خود در اسرع وقت اقدام فرمایید.\nواحد {UNI}",1],
+ ["127086","پرداخت شهریه دانشجو","دانشجوی گرامی شهریه شما پرداخت شد.\nبروزرسانی سیستم {TIME} روز کاری\nواحد {UNIT}",1],
+ // بقیه
+ ["103723","نقص در مدارک",P+"پرونده دانشنامه بررسی و به دلیل نقص مدارک تکمیلی رد شد.\nواحد {UNIT}"],
+ ["382221","کارت دانشجویی",P+"کارت {DEGREE} شما با شناسه {ID} صادر گردید.\nواحد {UNIT}"],
+ ["375169","بررسی مدارک هویتی",P+"مدارک هویتی شما به صادره {FIELD} با شناسه {ID} ثبت گردید.\nواحد {UNIT}"],
+ ["362678","ثبت نام",P+"ثبت نام شما در مقطع {DEGREE} با شناسه {ID} انجام شد.\nواحد {UNIT}"],
+ ["347635","ارجاع مدارک",P+"مدارک شما با شناسه {ID} به واحد تکمیلی جهت نهایی شدن ارجاع گردید.\nواحد مرکز"],
+ ["655530","ثبت دانشنامه",P+"دانشنامه {DEGREE} شما در رشته {FIELD} با شناسه {ID} ثبت گردید.\nواحد {UNIT}"],
+ ["860164","ثبت درخواست","درخواست شما ثبت شد.\nکد رهگیری جهت فرآیند: {CODE}"],
+ ["910708","تعلیق","درخواست شما به شماره رهگیری {CODE} در تاریخ جاری معلّق گردید.\nجهت پیگیری و بررسی دقیق‌تر، لطفاً با امور مربوطه تماس حاصل فرمایید.\nواحد مرکز"],
+ ["529543","مهارت",P+"مهارت شما در رشته {FIELD} با شناسه {ID} ثبت گردید.\nواحد {UNIT}"],
+ ["570510","فاقد اعتبار","دانشنامه تحصیلی شما بایگانی و در تاریخ فوق فاقد اعتبار می‌باشد.\nواحد {UNIT}"],
+ ["146224","پذیرش دانشجو",P+"پذیرش شما در مقطع {DEGREE} و رشته {FIELD} با شناسه {ID} تایید شد.\nواحد {UNIT}"],
+ ["396824","وزارت علوم","درخواست وزارت علوم ثبت و ارجاع گردید.\nشناسه تایید: {CODE|شناسه تایید}\nوزارت علوم تحقیقات و فناوری"],
+ ["502350","اعلام رتبه",P+"دریافت رتبه {CODE|رتبه} در رشته {FIELD} با شناسه {ID} تایید و واحد تکمیلی جهت نهایی شدن ارجاع گردید.\nواحد {UNIT}"],
+ ["306627","معافیت تحصیلی",P+"معافیت تحصیلی با شناسه {ID} تایید شد.\nواحد {UNIT}"],
+ ["473153","کد صحت","متقاضی گرامی جهت استعلام کد صحت را وارد کنید.\nکد صحت: {CODE|کد صحت}\nواحد {UNIT}"],
+ ["914453","واحد مالی",P+"درخواست شما با شناسه پرداخت {ID} به واحد مالی ارجاع داده شد.\nواحد {UNIT}"],
+ ["743216","احراز هویت","{GENDER} {NAME} با کد ملی {NATIONALID}\nپس از تاییدیه احراز هویت در مورخ {TIME|تاریخ} مراحل ثبت شرایط مجوز شما با موفقیت انجام شد.\nواحد {UNIT}"],
+ ["527919","هویتی","متقاضی گرامی {GENDER} {NAME} با شناسه هویتی {NATIONALID} درخواست کارت {CODE|نوع کارت} و مدارک هویتی شما با شناسه {ID} درحال بررسی می‌باشد.\nواحد {UNIT}"],
+ ["693570","وزارت","درخواست وزارت ثبت و ارجاع گردید.\nشناسه تایید: {CODE|شناسه تایید}\nواحد وزارت"],
+ ["864445","باقی مانده واحد","{GENDER} {NAME} با کد ملی {NATIONALID} در مورخ {TIME|تاریخ} تعداد {CODE|تعداد} واحد درسی از واحد های باقی مانده در مقطع {DEGREE} و رشته {FIELD} با موفقیت به ثبت رسید.\nواحد {UNIT}"],
+ ["577580","دانشگاه درحال بررسی",P+"دانشنامه {DEGREE} شما در رشته {FIELD} با شناسه {ID} درحال بررسی می‌باشد.\nواحد {UNIT}"]
+].map(a=>({code:a[0],title:a[1],text:a[2]}));
+const FAV=["955721","318623","747266","187027","127086","396824","353394","860164","910708","914453","743216"];
+const T=FAV.map(c=>ALL.find(x=>x.code===c)).concat(ALL.filter(x=>!FAV.includes(x.code)));
+T.forEach((x,i)=>x.fav=i<FAV.length);
+
+const LABELS={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",UNI:"واحد",CODE:"کد",TIME:"مدت (روز)"};
+
+// ===== پیام شناور =====
+let tt;
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),3500);}
+function msg(t,c){const o=$("out");if(c==="err"){o.style.display="none";errToast(t);return;}o.textContent=t;o.className="msg "+c;o.style.display="block";}
+
+// ===== رمز شخصی (پشت علامت آچار) =====
+try{localStorage.removeItem("sms_key")}catch(e){}
+$("key").value=ls.g("sms_token","");
+const sk=()=>ls.s("sms_token",tokenVal());
+["input","change","blur"].forEach(ev=>$("key").addEventListener(ev,sk));
+window.addEventListener("pagehide",sk);
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+$("wrench").onclick=()=>$("keyBox").classList.toggle("hide");
+$("saveKey").onclick=()=>{if(!tokenVal())return toast("رمز شخصی را وارد کن");sk();$("keyBox").classList.add("hide");toast("💾 ذخیره شد");loadMe();loadTpls();};
+
+// ===== انتخاب قالب =====
+const BASE=T.map(x=>({...x}));
+// قالب‌هایی که مدیر از پنل ساخته؛ اگر کدشان با قالب داخلی یکی باشد، جایش را می‌گیرد (برای اصلاح متن غلط)
+function applyServerTpls(list){
+  T.length=0;BASE.forEach(x=>T.push({...x}));
+  (list||[]).forEach(x=>{
+    const o={code:String(x.code),title:x.title,text:x.text,fav:!!x.fav,swap:!!x.swap,mode:x.mode,srv:1},i=T.findIndex(t=>t.code===o.code);
+    if(i>=0)T[i]=o;else T.push(o);
+  });
+}
+try{applyServerTpls(JSON.parse(ls.g("sms_tpls_srv","[]")));}catch(e){}
+let sel=Math.max(0,T.findIndex(t=>t.code===ls.g("sms_selc","")));
+function moreLabel(){const m=$("chipsMore");$("moreBtn").textContent=m.classList.contains("open")?"کمتر ▴":"بیشتر ("+T.filter(t=>!t.fav).length+") ▾";}
+let intro=true;
+function markSel(){document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on",+el.dataset.i===sel));}
+function ripple(el,e){const b=el.getBoundingClientRect(),d=Math.max(b.width,b.height),r=document.createElement("span");r.className="rip";
+  r.style.cssText="width:"+d+"px;height:"+d+"px;left:"+((e&&e.clientX||b.left+b.width/2)-b.left-d/2)+"px;top:"+((e&&e.clientY||b.top+b.height/2)-b.top-d/2)+"px";el.appendChild(r);setTimeout(()=>r.remove(),700);}
+function shake(el){try{el.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-4px)"},{transform:"translateX(0)"}],{duration:380,easing:"ease-in-out"})}catch(e){}}
+function renderChips(){
+  const a=$("chips"),m=$("chipsMore");a.innerHTML="";m.innerHTML="";
+  T.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="chip"+(i===sel?" on":"")+(intro?" enter":"");b.dataset.i=i;b.style.setProperty("--i",i);b.textContent=t.title;
+    if(t.fav)b.classList.add("fav");if(t.title.length>12)b.classList.add("long");
+    b.onclick=e=>{ripple(b,e);sel=i;ls.s("sms_selc",t.code);markSel();renderText();};
+    (t.fav?a:m).appendChild(b);
+  });
+  if(!T[sel].fav)m.classList.add("open");
+  moreLabel();intro=false;
+}
+$("moreBtn").onclick=()=>{const m=$("chipsMore");m.classList.toggle("open");moreLabel();
+  if(m.classList.contains("open"))m.querySelectorAll(".chip").forEach((c,k)=>{c.style.setProperty("--d",k*32+"ms");c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop");});};
+const box=$("sms");
+const meas=document.createElement("span");meas.className="f meas";document.body.appendChild(meas);
+function fit(el){meas.textContent=el.value||el.placeholder;el.style.width=(meas.offsetWidth+10)+"px";}
+function renderText(){
+  box.innerHTML="";box.classList.remove("swap");void box.offsetWidth;box.classList.add("swap");
+  T[sel].text.split(/(\{[A-Za-z0-9_]+(?:\|[^}]*)?\})/).forEach(p=>{
+    const m=p.match(/^\{([A-Za-z0-9_]+)(?:\|([^}]*))?\}$/);
+    if(m){
+      const s=document.createElement("input");s.type="text";s.className="f";
+      s.dataset.n=m[1];s.style.setProperty("--k",box.querySelectorAll(".f").length);s.placeholder=m[2]||LABELS[m[1]]||m[1];
+      s.autocomplete="off";s.autocapitalize="none";s.spellcheck=false;
+      s.oninput=()=>{s.classList.remove("bad");fit(s);};
+      s.onfocus=()=>{if(!document.body.classList.contains("editing")){prevY=window.scrollY;kbOpen=false;}document.body.classList.add("editing");[60,300,650].forEach(d=>setTimeout(up,d));};
+      s.onblur=()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&a.classList&&a.classList.contains("f")))restore();},60);
+      s.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const all=[...box.querySelectorAll(".f")],k=all.indexOf(s);if(all[k+1])all[k+1].focus();else s.blur();}};
+      if(m[1]==="NATIONALID")s.addEventListener("blur",()=>{if(s.value.trim()&&!validNID(s.value))s.classList.add("bad");});
+      if(m[1]==="UNIT"||m[1]==="UNI")s.value="مرکز";
+      else if(m[1]==="ID"||/شناسه/.test(s.placeholder))s.value=String(100000+Math.floor(Math.random()*900000)).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+      box.appendChild(s);fit(s);
+    }else p.split("\n").forEach((l,i)=>{if(i)box.appendChild(document.createElement("br"));box.appendChild(document.createTextNode(l));});
+  });
+}
+renderChips();renderText();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>box.querySelectorAll(".f").forEach(fit));
+
+// وقتی روی کادر زرد می‌زنی، متن پیامک بالای صفحه می‌آید تا زیر کیبورد نرود
+function up(){const el=document.querySelector(".phone");if(!el||!document.body.classList.contains("editing"))return;window.scrollTo(0,Math.max(0,el.getBoundingClientRect().top+window.scrollY-10));}
+let prevY=0;
+const baseH=window.visualViewport?window.visualViewport.height:window.innerHeight;
+// بعد از بسته شدن کیبورد، صفحه به جای قبلی برمی‌گردد
+function restore(){document.body.classList.remove("editing");requestAnimationFrame(()=>window.scrollTo({top:prevY,behavior:"auto"}));}
+let kbOpen=false,kbT;
+if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>{
+  if(!document.body.classList.contains("editing"))return;
+  const h=window.visualViewport.height;
+  if(h<baseH*0.8){kbOpen=true;clearTimeout(kbT);setTimeout(up,60);}
+  else if(kbOpen&&h>baseH*0.92){clearTimeout(kbT);kbT=setTimeout(()=>{if(window.visualViewport.height>baseH*0.92){kbOpen=false;const a=document.activeElement;if(a&&a.blur)a.blur();}},90);}
+});
+
+function showQuota(d){
+  const q=$("quota");
+  if(d&&d.admin){q.textContent="مدیر · نامحدود";q.className="quota";return;}
+  if(!d||d.remaining==null){q.className="quota hide";return;}
+  q.textContent="اعتبار شما "+Number(d.remaining).toLocaleString("fa-IR")+" عدد";q.className="quota"+(d.remaining<=0?" zero":d.remaining<=2?" low":"");
+}
+function showNote(n){
+  const b=$("noteBtn"),bar=$("noteBar");n=n||"";
+  if(!n){b.classList.add("hide");bar.classList.add("hide");return;}
+  const seen=ls.g("sms_note_seen","")===n;
+  b.classList.remove("hide");b.classList.toggle("dot",!seen);
+  bar.textContent="";const t=document.createElement("div");t.textContent="📢 پیام مدیر: "+n;bar.appendChild(t);
+  const ok=document.createElement("button");ok.textContent="باشه";ok.onclick=()=>{ls.s("sms_note_seen",n);b.classList.remove("dot");bar.classList.add("hide");};bar.appendChild(ok);
+  bar.classList.toggle("hide",seen);
+}
+$("noteBtn").onclick=()=>$("noteBar").classList.toggle("hide");
+async function loadTpls(){
+  const key=tokenVal();if(!key||WORKER.includes("YOUR-WORKER"))return;
+  try{
+    const r=await fetch(WORKER+"/templates",{headers:{"x-app-token":key},signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(12000):undefined});
+    if(!r.ok)return;const d=await r.json();
+    const cur=T[sel]&&T[sel].code,oldText=T[sel]&&T[sel].text;
+    ls.s("sms_tpls_srv",JSON.stringify(d.templates||[]));applyServerTpls(d.templates||[]);
+    sel=Math.max(0,T.findIndex(t=>t.code===cur));renderChips();
+    if(T[sel]&&T[sel].text!==oldText)renderText();
+  }catch(e){}
+}
+async function loadMe(){
+  const key=tokenVal();if(!key||WORKER.includes("YOUR-WORKER"))return;
+  const q=$("quota");
+  for(let a=0;a<2;a++){
+    try{
+      const r=await fetch(WORKER+"/me",{headers:{"x-app-token":key},signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(12000):undefined});
+      const d=await r.json().catch(()=>null);
+      if(r.status===401){q.textContent="🔑 رمز اشتباه است";q.className="quota zero";return;}
+      if(r.status===403&&d&&d.message){q.textContent="⛔ مسدود";q.className="quota zero";msg(d.message,"err");return;}
+      showQuota(r.ok?d:null);if(r.ok&&d)showNote(d.admin?"":d.note);return;
+    }catch(e){await new Promise(z=>setTimeout(z,1200));}
   }
-  users=o.users||[];
-  renderSum();renderUsers();renderLogs(o.logs||[]);renderViol(o.violations||[]);renderUnits(o.units||[]);renderTpls(o.templates||[]);$("tplWarn").classList.toggle("hide",Array.isArray(o.templates));
+  q.textContent="⚠️ اعتبار نامشخص؛ لمس کن";q.className="quota low"; // ارتباط برقرار نشد
 }
-function renderSum(){
-  const act=users.filter(u=>u.active),low=act.filter(u=>u.quota-u.used<=2).length,today=users.reduce((s,u)=>s+(u.today||0),0);
-  const box=$("sum");box.innerHTML="";
-  [["کاربران",users.length],["ارسال امروز",today],["اعتبار کم",low]].forEach(([k,v])=>{const d=el("div");d.appendChild(el("b",null,fa(v)));d.appendChild(el("span",null,k));box.appendChild(d);});
+$("quota").onclick=loadMe;
+
+// نوار شماره موبایل مثل سربرگ کیبورد، دقیقاً بالای آن می‌نشیند
+const barEl=document.querySelector(".bar");
+function liftBar(){const v=window.visualViewport;if(!v)return;barEl.style.bottom=Math.max(0,window.innerHeight-v.height-v.offsetTop)+"px";}
+if(window.visualViewport){window.visualViewport.addEventListener("resize",liftBar);window.visualViewport.addEventListener("scroll",liftBar);}
+$("mobile").addEventListener("focus",()=>{setTimeout(liftBar,100);setTimeout(liftBar,350);});
+$("mobile").addEventListener("blur",()=>setTimeout(liftBar,100));
+
+let snT;
+function errToast(t){ // پیام خطای کوچک پایین صفحه، بالای نوار ارسال
+  let e=$("snack");
+  if(!e){e=document.createElement("div");e.id="snack";e.className="snack";
+    const m=document.createElement("span");m.id="snackMsg";const x=document.createElement("b");x.textContent="✕";x.onclick=()=>e.classList.remove("show");
+    e.appendChild(m);e.appendChild(x);document.body.appendChild(e);}
+  $("snackMsg").textContent=String(t||"").replace(/^❌\s*(خطا:\s*)?/,"");
+  const bar=document.querySelector(".bar");
+  e.style.bottom=((bar&&parseFloat(bar.style.bottom))||0)+86+"px";
+  e.classList.remove("show");void e.offsetWidth;e.classList.add("show");
+  clearTimeout(snT);snT=setTimeout(()=>e.classList.remove("show"),Math.min(9000,3500+String(t).length*45));
+  try{navigator.vibrate&&navigator.vibrate(25)}catch(z){}
 }
-function copy(t){
-  if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(()=>toast("رمز کپی شد"),()=>prompt("رمز:",t));
-  prompt("رمز:",t);return Promise.resolve();
-}
-function renderUsers(){
-  const box=$("users");box.innerHTML="";
-  const list=users.filter(u=>!uq||u.name.toLowerCase().includes(uq.toLowerCase()));
-  if(!list.length){box.appendChild(el("div","card",users.length?"کاربری با این نام نیست":"هنوز کاربری نساخته‌ای"));return;}
-  list.forEach(u=>{
-    const rem=Math.max(u.quota-u.used,0),pct=u.quota?Math.min(100,rem/u.quota*100):0,blk=u.blocked_until>Date.now();
-    const cls=rem<=0?"zero":rem<=2?"low":"";
-    const c=el("div","card u"+(u.active?"":" off"));
-    const top=el("div","utop");
-    top.appendChild(el("b",null,u.name+(u.active?"":" (غیرفعال)")+(blk?" ⛔ مسدود":"")));
-    const tk=el("button","tok","🔑 "+(u.token||"—"));
-    tk.onclick=()=>u.token?copy(u.token):toast("رمز این کاربر ذخیره نشده؛ «تغییر رمز» را بزن",1);
-    top.appendChild(tk);c.appendChild(top);
-    c.appendChild(el("div","big "+cls,fa(rem)+" عدد مانده"));
-    const bar=el("div","bar"),i=el("i",cls);i.style.width=pct+"%";bar.appendChild(i);c.appendChild(bar);
-    c.appendChild(el("small",null,"ارسال موفق: "+fa(u.sent)+" • امروز: "+fa(u.today)+" • ساخته‌شده: "+dt(u.created)));
-    c.appendChild(el("small",null,"آخرین ارسال: "+dt(u.last)+(u.strikes?" • تخلف: "+fa(u.strikes):"")+(blk?" • مسدود تا "+dt(u.blocked_until):"")));
-    if(u.note)c.appendChild(el("small","note","📢 "+u.note));
-    const B=el("div","btns");
-    const btn=(t,f,k,dis)=>{const b=el("button",k||"",t);b.onclick=f;if(dis)b.disabled=true;B.appendChild(b);};
-    const act=async(body,msg)=>{try{await api("/admin/user/"+u.id,"POST",body);toast(msg);load();}catch(e){toast(e.message,1);}};
-    btn("−",()=>act({add:-1},"یکی کم شد"),"pm",rem<=0);
-    btn("+",()=>act({add:1},"یکی اضافه شد"),"pm");
-    [5,10,50].forEach(n=>btn("+"+fa(n),()=>act({add:n},"شارژ شد")));
-    btn("صفر",()=>{if(confirm("اعتبار «"+u.name+"» صفر شود؟"))act({quota:u.used},"اعتبار صفر شد");},"red",rem<=0);
-    btn("افزودن…",()=>{const n=parseInt(prompt("چند پیامک اضافه شود؟ (منفی هم می‌شود)","10"),10);if(n)act({add:n},"انجام شد");});
-    btn("تنظیم کل…",()=>{const n=parseInt(prompt("اعتبار کل (جمع همه) چند باشد؟",u.quota),10);if(n>=0)act({quota:n},"ذخیره شد");});
-    if(u.strikes>0||blk||!u.active)btn("رفع مسدودی",()=>act({unblock:true},"مسدودی برداشته شد"));
-    btn(u.active?"غیرفعال":"فعال",()=>act({active:!u.active},u.active?"غیرفعال شد":"فعال شد"));
-    btn("تغییر رمز",()=>{const t=prompt("رمز جدید (حداقل ۴ حرف):");if(t)act({token:t},"رمز عوض شد");});
-    btn("📢 پیام",()=>{const t=prompt("پیامی که «"+u.name+"» کنار اعتبارش در سایت می‌بیند (خالی = پاک کردن):",u.note||"");if(t!==null)act({note:t},t.trim()?"پیام ثبت شد":"پیام پاک شد");});
-    btn("ارسال‌ها",()=>{filter=u.id;load();$("logT").scrollIntoView({behavior:"smooth"});});
-    btn("حذف",()=>{if(confirm("کاربر «"+u.name+"» حذف شود؟"))api("/admin/user/"+u.id,"DELETE").then(()=>{toast("حذف شد");load();});},"red");
-    c.appendChild(B);box.appendChild(c);
-  });
-}
-function renderUnits(list){
-  const box=$("units");box.innerHTML="";
-  if(!list.length){box.appendChild(el("small",null,"موردی اضافه نشده"));return;}
-  list.forEach(x=>{
-    const c=el("span","chipx");c.appendChild(el("span",null,x.word));
-    const b=el("button",null,"×");b.onclick=()=>api("/admin/unit/"+x.id,"DELETE").then(()=>{toast("حذف شد");load();}).catch(e=>toast(e.message,1));
-    c.appendChild(b);box.appendChild(c);
-  });
-}
-// ===== چرخ: وسط واضح، بالا و پایین کج و کم‌رنگ؛ مثل لاستیک می‌چرخد =====
-function spin(w){
-  const c=w.getBoundingClientRect(),mid=c.top+c.height/2;
-  w.querySelectorAll(".log").forEach(e=>{
-    const r=e.getBoundingClientRect(),d=((r.top+r.height/2)-mid)/(c.height/2),a=Math.min(Math.abs(d),1.3);
-    e.style.transform="rotateX("+(-d*46)+"deg) scale("+(1-a*.14)+") translateZ("+(-a*45)+"px)";
-    e.style.opacity=Math.max(0,1-a*.8);
-  });
-}
-function renderLogs(logs){
-  const lt=$("logT"),f=users.find(x=>x.id===filter);
-  lt.textContent=filter?"ارسال‌های "+(f?f.name:"کاربر")+" (برای برگشت لمس کن)":"آخرین ارسال‌ها";
-  lt.onclick=filter?(()=>{filter=0;load();}):null;
-  const box=$("logs");box.innerHTML="";box.className="";
-  if(!logs.length){box.textContent="موردی نیست";return;}
-  box.className="wheel";
-  box.appendChild(el("div","pad"));
-  logs.forEach(x=>{
-    const d=el("div","log");
-    d.appendChild(el("span",null,x.user_name+" • "+x.mobile+" • قالب "+x.template));
-    d.appendChild(el("span",x.ok?"okc":"nok",(x.ok?"✓ ":"✗ ")+dt(x.ts)));
-    box.appendChild(d);
-  });
-  box.appendChild(el("div","pad"));
-  box.onscroll=()=>{if(!box._r)box._r=requestAnimationFrame(()=>{box._r=0;spin(box);});};
-  spin(box);
-}
-function renderViol(list){
-  const box=$("viol");box.innerHTML="";
-  if(!list.length){box.textContent="تخلفی ثبت نشده 👌";return;}
-  list.forEach(x=>{
-    const d=el("div","log");
-    d.appendChild(el("span",null,x.user_name+" • «"+x.value+"» در "+x.field+" ("+x.reason+")"));
-    d.appendChild(el("span","nok",dt(x.ts)));box.appendChild(d);
-  });
-}
-// ---------- قالب‌ها ----------
-const DEFLBL={NAME:"نام و نام خانوادگی",GENDER:"آقای/خانم",NATIONALID:"کد ملی",ID:"شناسه",DEGREE:"مقطع",FIELD:"رشته",UNIT:"واحد",UNI:"واحد",CODE:"کد",TIME:"مدت (روز)"};
-function varsOf(raw){return [...new Set([...String(raw).matchAll(/#([A-Za-z][A-Za-z0-9_]{0,19})#/g)].map(m=>m[1]))];}
-function curLabels(){const o={};document.querySelectorAll("#tVars input").forEach(i=>{if(i.value.trim())o[i.dataset.v]=i.value.trim();});return o;}
-function refreshTpl(keep){
-  const raw=$("tRaw").value,vs=varsOf(raw),box=$("tVars"),old=keep||curLabels();box.innerHTML="";
-  vs.forEach(v=>{const r=el("div","vrow");r.appendChild(el("code",null,v));const i=document.createElement("input");i.dataset.v=v;i.placeholder="برچسب کادر (اختیاری، پیش‌فرض: "+(DEFLBL[v]||v)+")";i.value=old[v]||"";i.oninput=refreshPrev;r.appendChild(i);box.appendChild(r);});
-  refreshPrev();
-}
-function refreshPrev(){
-  const raw=$("tRaw").value.trim(),p=$("tPrev");if(!raw){p.classList.add("hide");return;}
-  const L=curLabels();let t=raw.replace(/#NAME#(\s+)#GENDER#/,"#GENDER#$1#NAME#").replace(/#([A-Za-z][A-Za-z0-9_]{0,19})#/g,(m,v)=>"["+(L[v]||DEFLBL[v]||v)+"]");
-  p.textContent=t;p.classList.remove("hide");
-}
-function renderTpls(list){
-  const box=$("tpls");box.innerHTML="";
-  if(!list.length){box.appendChild(el("small","hint","هنوز قالبی از اینجا نساخته‌ای. قالب‌های قبلی داخل خود سایت هستند و از اینجا عوض نمی‌شوند، مگر این‌که همان کد را اینجا دوباره ذخیره کنی."));return;}
-  list.forEach(t=>{
-    const r=el("div","trow"),l=el("div");l.appendChild(el("b",null,t.title));l.appendChild(el("br"));l.appendChild(el("small",null,"کد "+t.code+(t.fav?" • ویژه":"")+" • CODE: "+({id:"عدد/حرف",num:"فقط عدد",text:"متن"}[t.mode]||t.mode)));
-    const g=el("div","btns");
-    const b=(txt,f,cls)=>{const x=el("button",cls||null,txt);x.onclick=f;g.appendChild(x);};
-    b(t.fav?"★":"☆",async()=>{try{await api("/admin/template/"+t.code,"POST",{fav:!t.fav});load();}catch(e){toast(e.message,1);}});
-    b("ویرایش",()=>{$("tCode").value=t.code;$("tTitle").value=t.title;$("tRaw").value=t.raw;$("tMode").value=t.mode;$("tFav").checked=!!t.fav;
-      const L={};String(t.text).replace(/\{(\w+)\|([^}]*)\}/g,(m,v,l)=>{L[v]=l;});refreshTpl(L);$("tplCard").scrollIntoView({behavior:"smooth"});});
-    b("حذف",()=>{if(confirm("قالب «"+t.title+"» حذف شود؟"))api("/admin/template/"+t.code,"DELETE").then(()=>{toast("حذف شد");load();}).catch(e=>toast(e.message,1));},"red");
-    r.appendChild(l);r.appendChild(g);box.appendChild(r);
-  });
-}
-async function enter(){
-  tok=$("adm").value.replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[^\x21-\x7E]/g,"")||tok;if(!tok)return;
-  try{await load();sessionStorage.setItem("adm",tok);$("login").classList.add("hide");$("panel").classList.remove("hide");spin($("logs"));}
-  catch(e){toast(e.message,1);}
-}
-$("go").onclick=enter;$("adm").onkeydown=e=>e.key==="Enter"&&enter();
-$("uq").oninput=()=>{uq=$("uq").value.trim();renderUsers();};
-$("rnd").onclick=()=>{$("nTok").value=Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");};
-$("add").onclick=async()=>{
-  try{await api("/admin/user","POST",{name:$("nName").value,token:$("nTok").value,quota:$("nQ").value});
-    toast("کاربر ساخته شد؛ رمز: "+$("nTok").value);$("nName").value="";$("nTok").value="";$("nQ").value="1";load();}
-  catch(e){toast(e.message,1);}
+function glassAlert(title,text){errToast(text||title);} // همه‌ی خطاها حالا پیام کوچک پایین‌اند
+let pend=null;
+const NUMCODE=new Set(["955721","210603"]);
+// بررسی نرم قبل از ارسال: عبارت ممنوع را با پیام کوتاه نشان می‌دهد تا کاربر بی‌دلیل جریمه نشود (فیلتر اصلی روی سرور است)
+const FINW=/(?:^|[^\u0621-\u06D3])(?:وام|تسهیلات|واریز|برداشت|پول)(?:ها|های|ی|ات|ای|ام)?(?![\u0621-\u06D3])/;
+const LICW=/گواهی ?نامه|موتور ?سیکلت|رانندگی|پایه ?(?:ی ?)?(?:یکم|یک|اول|دوم|سوم|[123])(?![\u0621-\u06D3\d])/;
+function softBad(v){const f=norm(String(v)).replace(/[يك]/g,c=>c==="ي"?"ی":"ک").replace(/[\u064B-\u065F\u0670\u0640]/g,"").replace(/[\u200c\u200d]/g," ");return FINW.test(f)||LICW.test(f);}
+function burst(){const r=$("send").getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,cols=["#ffd98a","#3dd9c0","#6d8bff","#ffffff","#f0a93a"];
+  for(let i=0;i<22;i++){const p=document.createElement("span");p.className="cf";const a=Math.random()*Math.PI*2,d=50+Math.random()*90;
+    p.style.cssText="left:"+x+"px;top:"+y+"px;background:"+cols[i%5]+";--dx:"+Math.cos(a)*d+"px;--dy:"+(Math.sin(a)*d-45)+"px;--rot:"+(Math.random()*720-360)+"deg";
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);}
+  try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}}
+
+// ===== ارسال =====
+$("send").onclick=async()=>{
+  const key=tokenVal(),t=T[sel],mobile=cleanMobile($("mobile").value);
+  if(WORKER.includes("YOUR-WORKER"))return msg("آدرس Worker هنوز داخل فایل تنظیم نشده","err");
+  if(!key){$("keyBox").classList.remove("hide");return msg("رمز شخصی را از علامت 🔧 بالای صفحه وارد کن","err");}
+  if(!/^09\d{9}$/.test(mobile)){shake($("mobile"));return msg("شماره موبایل معتبر نیست","err");}
+  const spans=[...box.querySelectorAll(".f")];
+  const empty=spans.filter(x=>!x.value.trim());
+  if(empty.length){empty.forEach(x=>{x.classList.add("bad");shake(x);});return msg("بخش‌های قرمز را پر کن","err");}
+  if(t.mode?t.mode==="num":NUMCODE.has(t.code)){const c=spans.find(x=>x.dataset.n==="CODE");
+    if(c&&!/^\d+$/.test(norm(c.value))){c.classList.add("bad");shake(c);return glassAlert("فقط عدد بنویسید","در کادر «شماره» فقط عدد بنویسید؛ حروف و متن مجاز نیست.");}}
+  const bad2=spans.find(x=>!["ID","NATIONALID","CODE","TIME"].includes(x.dataset.n)&&softBad(x.value));
+  if(bad2){bad2.classList.add("bad");shake(bad2);return msg("این عبارت مجاز نیست (مثل گواهینامه، موتورسیکلت، وام، پول، واریز…)؛ آن را بردار","err");}
+  const parameters=spans.map(s=>({name:s.dataset.n,value:s.value.trim()}));
+  const np=parameters.find(p=>p.name==="NAME")||parameters[0]||{value:""};
+  const saved=parameters.map(p=>({n:p.name,v:p.value}));
+  const nidF=spans.find(x=>x.dataset.n==="NATIONALID");
+  if(nidF&&!validNID(nidF.value)){nidF.classList.add("bad");if(!confirm("کد ملی معتبر به نظر نمی‌رسد. به‌هر حال ارسال شود؟"))return;}
+  const dup=loadH().find(x=>x.code===t.code&&x.mobile===mobile&&Date.now()-x.t<60000);
+  if(dup&&!confirm("همین قالب تا یک دقیقه پیش به همین شماره ارسال شده. دوباره ارسال شود؟"))return;
+  // در قالب‌های sms.ir جنسیت بعد از نام می‌آید؛ برای نمایش «آقای نام» مقدارها جابه‌جا فرستاده می‌شوند
+  if(t.swap!==false&&parameters.some(p=>p.name==="GENDER")&&parameters.some(p=>p.name==="NAME"))
+    parameters.forEach(p=>{if(p.name==="GENDER")p.name="NAME";else if(p.name==="NAME")p.name="GENDER";});
+  $("send").disabled=true;$("send").classList.add("busy");msg("در حال ارسال...","ok");
+  // هر ارسال یک شناسه یکتا دارد؛ اگر اتصال قطع شد و دوباره امتحان شود، پیامک دوبار نمی‌رود
+  const sig=JSON.stringify([t.code,mobile,parameters]);
+  if(!pend||pend.sig!==sig||Date.now()-pend.t>120000)pend={sig,t:Date.now(),rid:(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now()+"-"+Math.random().toString(36).slice(2))};
+  try{
+    let r,d,att=0;
+    for(;;){
+      try{
+        r=await fetch(API_URL,{method:"POST",
+          headers:{"Content-Type":"application/json","Accept":"application/json","x-app-token":key},
+          body:JSON.stringify({mobile,templateId:Number(t.code),parameters,rid:pend.rid}),
+          signal:(typeof AbortSignal.timeout==="function")?AbortSignal.timeout(25000):undefined});
+        d=await r.json().catch(()=>({}));
+        if(r.status>=500&&att<2){att++;msg("اتصال ناپایدار؛ تلاش دوباره ("+att+" از ۲)...","ok");await new Promise(z=>setTimeout(z,1400*att));continue;}
+        break;
+      }catch(e){
+        if(att<2){att++;msg("اتصال ناپایدار؛ تلاش دوباره ("+att+" از ۲)...","ok");await new Promise(z=>setTimeout(z,1400*att));continue;}
+        throw e;
+      }
+    }
+    if(r.ok&&d.status===1){pend=null;
+      $("out").style.display="none";toast("✅ پیامک ارسال شد");burst();if(d._remaining!=null)showQuota({remaining:d._remaining});
+      const h=loadH();h.unshift({id:d.data&&d.data.messageId,mobile,name:np.value,tpl:t.title,code:t.code,vals:saved,t:Date.now(),s:null});
+      saveH(h);fillRecent();if(!$("hist").classList.contains("hide"))renderH();
+      $("mobile").value="";
+      try{box.animate([{transform:"none",opacity:1},{transform:"translateY(-70px) scale(.94)",opacity:0}],{duration:420,easing:"cubic-bezier(.5,0,.8,.4)"}).finished.then(renderText,renderText);}catch(e){renderText();}
+    }else{msg("❌ خطا: "+(d.message||r.status),"err");
+      if([400,402,403].includes(r.status)&&d.message)glassAlert("پیامک ارسال نشد",d.message);
+      else if(r.status>=500)glassAlert("ارتباط ناپایدار است","جواب نیامد. لطفاً دوباره «ارسال» را بزنید؛ پیامک دوبار نمی‌رود.");}
+  }catch(e){msg("❌ ارتباط قطع شد؛ دوباره «ارسال» را بزنید","err");glassAlert("ارتباط قطع شد","یک لحظه اینترنت یا سرور جواب نداد. لطفاً دوباره «ارسال» را بزنید؛ پیامک دوبار نمی‌رود.");}
+  $("send").disabled=false;$("send").classList.remove("busy");
 };
-$("wAdd").onclick=async()=>{
-  try{await api("/admin/unit","POST",{word:$("wIn").value});toast("اضافه شد");$("wIn").value="";load();}
-  catch(e){toast(e.message,1);}
+
+// ===== تاریخچه =====
+const HK="sms_hist";
+function loadH(){try{return JSON.parse(ls.g(HK,"[]"))}catch(e){return[]}}
+function saveH(h){ls.s(HK,JSON.stringify(h.slice(0,50)));}
+// کد وضعیت sms.ir: 1 رسیده | 2 نرسیده | 3 و 4 اپراتور | بقیه در انتظار
+function info(s){
+  if(s===1)return["✅ رسیده به گوشی","ok"];
+  if(s===2)return["❌ نرسیده","err"];
+  if(s===3||s===4)return["📡 در اختیار اپراتور","op"];
+  return["⏳ در انتظار تایید","wait"];
+}
+function renderH(){
+  const b=$("hist"),h=loadH();b.innerHTML="";
+  const hh=document.createElement("div");hh.className="hh";
+  const ti=document.createElement("span");ti.textContent="تاریخچه ارسال‌ها";hh.appendChild(ti);
+  const rb=document.createElement("button");rb.textContent="🔄 بروزرسانی";rb.onclick=refreshH;
+  const cb=document.createElement("button");cb.textContent="🗑 پاک کردن";
+  cb.onclick=()=>{if(confirm("تاریخچه ارسال‌ها پاک شود؟")){saveH([]);renderH();toast("تاریخچه پاک شد");}};
+  const grp=document.createElement("div");grp.style.cssText="display:flex;gap:6px";const xb=document.createElement("button");xb.textContent="⬇️ خروجی";xb.onclick=exportCSV;
+  grp.appendChild(rb);grp.appendChild(xb);grp.appendChild(cb);hh.appendChild(grp);
+  b.appendChild(hh);
+  if(!h.length){const e=document.createElement("div");e.className="hint";e.textContent="هنوز پیامکی ارسال نشده";b.appendChild(e);return;}
+  h.forEach((x,k)=>{
+    const [txt,cls]=info(x.s),d=document.createElement("div");d.className="hi";d.style.setProperty("--k",k);
+    const bb=document.createElement("b");bb.textContent=(x.name||"-")+" — "+x.mobile;d.appendChild(bb);
+    d.appendChild(document.createElement("br"));
+    const tag=document.createElement("span");tag.className="tag "+cls;tag.textContent=txt;d.appendChild(tag);
+    const r=document.createElement("span");r.className="raw";r.textContent=" کد وضعیت: "+(x.s==null?"-":x.s);d.appendChild(r);
+    d.appendChild(document.createElement("br"));
+    d.appendChild(document.createTextNode((x.tpl?x.tpl+" • ":"")+new Date(x.t).toLocaleString("fa-IR")));
+    if(x.vals&&x.code){d.appendChild(document.createElement("br"));const re=document.createElement("button");re.className="re";re.textContent="🔁 ارسال دوباره";re.onclick=()=>resend(x);d.appendChild(re);}
+    b.appendChild(d);
+  });
+}
+function resend(x){
+  const i=T.findIndex(t=>t.code===x.code);if(i<0)return toast("قالب پیدا نشد");
+  sel=i;ls.s("sms_selc",x.code);renderChips();renderText();
+  box.querySelectorAll(".f").forEach(f=>{const v=(x.vals||[]).find(p=>p.n===f.dataset.n);if(v){f.value=v.v;fit(f);}});
+  $("hist").classList.add("hide");$("mobile").value="";window.scrollTo({top:0});
+  toast("🔁 آماده ارسال؛ شماره را بنویس");$("mobile").focus();
+}
+function exportCSV(){
+  const h=loadH();if(!h.length)return toast("تاریخچه خالی است");
+  const q=v=>{v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};
+  const rows=[["نام","شماره","قالب","زمان","وضعیت"].map(q).join(",")].concat(h.map(x=>[x.name,x.mobile,x.tpl,new Date(x.t).toLocaleString("fa-IR"),info(x.s)[0].replace(/^\S+\s/,"")].map(q).join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"}));
+  a.download="sms-history.csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  toast("⬇️ فایل ذخیره شد");
+}
+async function refreshH(){
+  const key=tokenVal();if(!key)return toast("اول رمز شخصی را از 🔧 وارد کن");
+  const h=loadH();
+  for(const x of h){
+    if(!x.id||x.s===1||x.s===2)continue;
+    try{
+      const r=await fetch(REPORT_URL+x.id,{headers:{"Accept":"application/json","x-app-token":key}});
+      const d=await r.json();
+      if(d&&d.data)x.s=(d.data.deliveryState===undefined?null:d.data.deliveryState);
+    }catch(e){}
+  }
+  saveH(h);renderH();
+}
+$("histBtn").onclick=()=>{
+  const b=$("hist");b.classList.toggle("hide");
+  if(!b.classList.contains("hide")){b.classList.add("anim");setTimeout(()=>b.classList.remove("anim"),1200);renderH();refreshH();setTimeout(()=>b.scrollIntoView({behavior:"smooth",block:"start"}),60);}
 };
-$("tRaw").oninput=()=>refreshTpl();
-$("tSave").onclick=async()=>{
-  try{const d=await api("/admin/template","POST",{code:$("tCode").value,title:$("tTitle").value,raw:$("tRaw").value,mode:$("tMode").value,fav:$("tFav").checked,labels:curLabels()});
-    toast("قالب ذخیره شد");$("tCode").value="";$("tTitle").value="";$("tRaw").value="";$("tFav").checked=false;$("tMode").value="id";refreshTpl();load();}
-  catch(e){if(e.status===404){$("tplWarn").classList.remove("hide");toast("Worker هنوز به‌روز نیست؛ worker.js جدید را Deploy کن",1);}else toast(e.message,1);}
-};
-if(tok){$("adm").value=tok;enter();}
+function fillRecent(){
+  const seen=[],dl=$("recentNums");dl.innerHTML="";
+  for(const x of loadH()){if(x.mobile&&!seen.includes(x.mobile)){seen.push(x.mobile);const o=document.createElement("option");o.value=x.mobile;dl.appendChild(o);if(seen.length>=8)break;}}
+}
+fillRecent();
+$("mobile").addEventListener("blur",()=>{const c=cleanMobile($("mobile").value);if(c)$("mobile").value=c;});
+$("mobile").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("mobile").blur();$("send").click();}});
+loadMe();loadTpls();
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
